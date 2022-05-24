@@ -12,12 +12,12 @@ this will have -
 - Deep Dark
 - All sculk Blocks
 - Warden
-- Ancient cities (not implemented yet)﻿
+- Ancient cities (not implemented yet)
 
 https://www.planetminecraft.com/mod/the-wild-mod-fabric-5373520/
 
 ## Version
-1.0
+1.1
 
 ## License
 AGNU 3.0 License.
