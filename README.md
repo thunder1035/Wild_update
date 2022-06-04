@@ -21,7 +21,7 @@ Information is obtained from-
 https://minecraft.fandom.com/wiki/Java_Edition_1.19
 
 ## Version
-1.2
+1.3
 
 ## License
 AGNU 3.0 License.
