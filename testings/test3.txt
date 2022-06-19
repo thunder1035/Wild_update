@@ -1,0 +1,5 @@
+minetest.register_craftitem("wild_update:echo_shard", {
+    description = "Echo Shard",
+    tt_help = "Can be used to craft recovery compasses",
+    inventory_image = "mcl_echo_shard.png"
+})

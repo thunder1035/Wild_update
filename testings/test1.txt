@@ -1,0 +1,518 @@
+
+minetest.register_node("wild_update:mangrove_propagule", {
+	description = "propagule",
+	_tt_help = ("Needs soil and light to grow"),
+	_doc_items_longdesc = ("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+	_doc_items_hidden = false,
+	drawtype = "plantlike_rooted",
+	paramtype = "light",
+	special_tiles = {{name = "mcl_mangrove_propagule.png", tileable_vertical = true}},
+	waving = 2,
+	visual_scale = 1.0,
+	tiles = "mcl_mangrove_propagule.png",
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+	sunlight_propagates = true,
+	walkable = false,
+	selection_box = {
+		type = "fixed",
+		fixed = {-5/16, -0.5, -5/16, 5/16, 0.5, 5/16},
+	},
+	stack_max = 64,
+	groups = {
+		plant = 1, sapling = 1, non_mycelium_plant = 1,deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,destroy_by_lava_flow = 1, compostability = 30
+	},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_int("stage", 0)
+	end,
+	on_place = mcl_util.generate_on_place_plant_function(function(pos, node)
+			local node_below = minetest.get_node_or_nil({x=pos.x,y=pos.y-1,z=pos.z})
+		if not node_below then return false end
+		local nn = node_below.name
+		return ((minetest.get_item_group(nn, "grass_block") == 1) or
+				nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
+				nn=="mcl_core:dirt")
+	end),
+	node_placement_prediction = "wild_update:mangrove_propagule",
+	_mcl_blast_resistance = 0,
+	_mcl_hardness = 1,
+on_place = function(itemstack, placer, pointed_thing)
+		-- Call on_rightclick if the pointed node defines it
+		if pointed_thing.type == "node" and placer and
+				not placer:get_player_control().sneak then
+			local node_ptu = minetest.get_node(pointed_thing.under)
+			local def_ptu = minetest.registered_nodes[node_ptu.name]
+			if def_ptu and def_ptu.on_rightclick then
+				return def_ptu.on_rightclick(pointed_thing.under, node_ptu, placer,
+					itemstack, pointed_thing)
+			end
+		end
+
+		local pos = pointed_thing.under
+		if minetest.get_node(pos).name ~= "mcl_core:dirt" then
+			return itemstack
+		end
+
+		local height = math.random(4, 6)
+		local pos_top = {x = pos.x, y = pos.y + height, z = pos.z}
+		local node_top = minetest.get_node(pos_top)
+		local def_top = minetest.registered_nodes[node_top.name]
+		local player_name = placer:get_player_name()
+
+		if def_top and def_top.liquidtype == "source" and
+				minetest.get_item_group(node_top.name, "water") > 0 then
+			if not minetest.is_protected(pos, player_name) and
+					not minetest.is_protected(pos_top, player_name) then
+				minetest.set_node(pos, {name = "wild_update:mangrove_propagule",
+					param2 = height * 16})
+				if not minetest.is_creative_enabled(player_name) then
+					itemstack:take_item()
+				end
+			else
+				minetest.chat_send_player(player_name, "Node is protected")
+				minetest.record_protection_violation(pos, player_name)
+			end
+		end
+
+		return itemstack
+	end,
+
+	after_destruct  = function(pos, oldnode)
+		minetest.set_node(pos, {name = "mcl_core:dirt"})
+	end
+})
+
+
+
+--------------------------
+minetest.register_node("wild_update:mangrove_propagule", {
+	description = "propagule",
+	_tt_help = ("Needs soil and light to grow"),
+	_doc_items_longdesc = ("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+	_doc_items_hidden = false,
+	drawtype = "plantlike_rooted",
+	node_dig_prediction = "mcl_core:dirt",
+	paramtype = "light",
+	paramtype2 = "leveled",
+	special_tiles = {{name = "mcl_mangrove_propagule.png", tileable_vertical = true}},
+	waving = 2,
+	visual_scale = 1.0,
+	tiles = "mcl_mangrove_propagule.png",
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+	paramtype = "light",
+	sunlight_propagates = true,
+	walkable = false,
+	selection_box = {
+		type = "fixed",
+		fixed = {-5/16, -0.5, -5/16, 5/16, 0.5, 5/16},
+	},
+	stack_max = 64,
+	groups = {
+		plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
+		deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+		destroy_by_lava_flow = 1, compostability = 30
+	},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_int("stage", 0)
+	end,
+	on_place = mcl_util.generate_on_place_plant_function(function(pos, node)
+			local node_below = minetest.get_node_or_nil({x=pos.x,y=pos.y-1,z=pos.z})
+		if not node_below then return false end
+		local nn = node_below.name
+		return ((minetest.get_item_group(nn, "grass_block") == 1) or
+				nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
+				nn=="mcl_core:dirt")
+	end),
+	node_placement_prediction = "",
+	_mcl_blast_resistance = 0,
+	_mcl_hardness = 0,
+on_place = function(itemstack, placer, pointed_thing)
+		-- Call on_rightclick if the pointed node defines it
+		if pointed_thing.type == "node" and placer and
+				not placer:get_player_control().sneak then
+			local node_ptu = minetest.get_node(pointed_thing.under)
+			local def_ptu = minetest.registered_nodes[node_ptu.name]
+			if def_ptu and def_ptu.on_rightclick then
+				return def_ptu.on_rightclick(pointed_thing.under, node_ptu, placer,
+					itemstack, pointed_thing)
+			end
+		end
+
+		local pos = pointed_thing.under
+		if minetest.get_node(pos).name ~= "default:sand" then
+			return itemstack
+		end
+
+		local height = math.random(4, 6)
+		local pos_top = {x = pos.x, y = pos.y + height, z = pos.z}
+		local node_top = minetest.get_node(pos_top)
+		local def_top = minetest.registered_nodes[node_top.name]
+		local player_name = placer:get_player_name()
+
+		if def_top and def_top.liquidtype == "source" and
+				minetest.get_item_group(node_top.name, "water") > 0 then
+			if not minetest.is_protected(pos, player_name) and
+					not minetest.is_protected(pos_top, player_name) then
+				minetest.set_node(pos, {name = "wild_update:mangrove_propagule",
+					param2 = height * 16})
+				if not minetest.is_creative_enabled(player_name) then
+					itemstack:take_item()
+				end
+			else
+				minetest.chat_send_player(player_name, "Node is protected")
+				minetest.record_protection_violation(pos, player_name)
+			end
+		end
+
+		return itemstack
+	end,
+
+	after_destruct  = function(pos, oldnode)
+		minetest.set_node(pos, {name = "mcl_core:dirt"})
+	end
+})
+
+-------------------------
+
+minetest.register_node("default:sand_with_kelp", {
+	description = S("Kelp"),
+	drawtype = "plantlike_rooted",
+	waving = 1,
+	tiles = {"default_sand.png"},
+	special_tiles = {{name = "default_kelp.png", tileable_vertical = true}},
+	inventory_image = "default_kelp.png",
+	wield_image = "default_kelp.png",
+	paramtype = "light",
+	paramtype2 = "leveled",
+	groups = {snappy = 3},
+	selection_box = {
+		type = "fixed",
+		fixed = {
+				{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+				{-2/16, 0.5, -2/16, 2/16, 3.5, 2/16},
+		},
+	},
+	node_dig_prediction = "default:sand",
+	node_placement_prediction = "",
+	sounds = default.node_sound_sand_defaults({
+		dig = {name = "default_dig_snappy", gain = 0.2},
+		dug = {name = "default_grass_footstep", gain = 0.25},
+	}),
+
+	on_place = function(itemstack, placer, pointed_thing)
+		-- Call on_rightclick if the pointed node defines it
+		if pointed_thing.type == "node" and placer and
+				not placer:get_player_control().sneak then
+			local node_ptu = minetest.get_node(pointed_thing.under)
+			local def_ptu = minetest.registered_nodes[node_ptu.name]
+			if def_ptu and def_ptu.on_rightclick then
+				return def_ptu.on_rightclick(pointed_thing.under, node_ptu, placer,
+					itemstack, pointed_thing)
+			end
+		end
+
+		local pos = pointed_thing.under
+		if minetest.get_node(pos).name ~= "default:sand" then
+			return itemstack
+		end
+
+		local height = math.random(4, 6)
+		local pos_top = {x = pos.x, y = pos.y + height, z = pos.z}
+		local node_top = minetest.get_node(pos_top)
+		local def_top = minetest.registered_nodes[node_top.name]
+		local player_name = placer:get_player_name()
+
+		if def_top and def_top.liquidtype == "source" and
+				minetest.get_item_group(node_top.name, "water") > 0 then
+			if not minetest.is_protected(pos, player_name) and
+					not minetest.is_protected(pos_top, player_name) then
+				minetest.set_node(pos, {name = "default:sand_with_kelp",
+					param2 = height * 16})
+				if not minetest.is_creative_enabled(player_name) then
+					itemstack:take_item()
+				end
+			else
+				minetest.chat_send_player(player_name, "Node is protected")
+				minetest.record_protection_violation(pos, player_name)
+			end
+		end
+
+		return itemstack
+	end,
+
+	after_destruct  = function(pos, oldnode)
+		minetest.set_node(pos, {name = "default:sand"})
+	end
+})
+
+-----------------------------
+
+register_sapling("propagule", S("mangrove_propagule"),
+	S("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+	S("Needs soil and light to grow"),
+	"mcl_mangrove_propagule.png", {-5/16, -0.5, -5/16, 5/16, 0.5, 5/16})
+
+minetest.register_node("wild_update:mangrove_propagule:", {
+	description = "propagule",
+	_tt_help = ("Needs soil and light to grow"),
+	_doc_items_longdesc = ("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+	_doc_items_hidden = false,
+	drawtype = "plantlike_rooted",
+	waving = 2,
+	visual_scale = 1.0,
+	tiles = {texture},
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+	paramtype = "light",
+	sunlight_propagates = true,
+	walkable = false,
+	selection_box = {
+		type = "fixed",
+		fixed = {-5/16, -0.5, -5/16, 5/16, 0.5, 5/16},
+	},
+	stack_max = 64,
+	groups = {
+		plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
+		deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+		destroy_by_lava_flow = 1, compostability = 30
+	},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_int("stage", 0)
+	end,
+	on_place = mcl_util.generate_on_place_plant_function(function(pos, node)
+			local node_below = minetest.get_node_or_nil({x=pos.x,y=pos.y-1,z=pos.z})
+		if not node_below then return false end
+		local nn = node_below.name
+		return ((minetest.get_item_group(nn, "grass_block") == 1) or
+				nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
+				nn=="mcl_core:dirt")
+	end),
+	node_placement_prediction = "",
+	_mcl_blast_resistance = 0,
+	_mcl_hardness = 0,
+})
+end
+
+----------------
+
+local surfaces = {
+	{ "dirt_with_grass", "mcl_core:dirt_with_grass" },
+	{ "dirt", "mcl_core:dirt" },
+	{ "sand", "mcl_core:sand", 1 },
+}
+
+local function propagule_on_place(itemstack, placer, pointed_thing)
+	if pointed_thing.type ~= "node" or not placer then
+		return itemstack
+	end
+
+	local player_name = placer:get_player_name()
+	local pos_under = pointed_thing.under
+	local pos_above = pointed_thing.above
+	local node_under = minetest.get_node(pos_under)
+	local node_above = minetest.get_node(pos_above)
+	local def_under = minetest.registered_nodes[node_under.name]
+	local def_above = minetest.registered_nodes[node_above.name]
+
+	if def_under and def_under.on_rightclick and not placer:get_player_control().sneak then
+		return def_under.on_rightclick(pos_under, node_under,
+				placer, itemstack, pointed_thing) or itemstack
+	end
+
+	if pos_under.y >= pos_above.y then
+		return itemstack
+	end
+
+	-- Placement rules:
+	-- propagule can only be placed on top of dirt inside water
+	local g_above_water = minetest.get_item_group(node_above.name, "water")
+	end
+
+	if minetest.is_protected(pos_under, player_name) or
+			minetest.is_protected(pos_above, player_name) then
+		minetest.log("action", player_name
+			.. " tried to place " .. itemstack:get_name()
+			.. " at protected position "
+			.. minetest.pos_to_string(pos_under))
+		minetest.record_protection_violation(pos_under, player_name)
+		return itemstack
+	end
+
+	-- Select a propagule node
+	if node_under.name == "mcl_core:dirt" then
+		node_under.name = "wild_update:mangrove_propagule_dirt"
+	elseif node_under.name == "mcl_core:dirt_with_grass" then
+		node_under.name = "wild_update:mangrove_propagule_dirt_with_grass"
+	elseif node_under.name == "mcl_core:sand" then
+		node_under.name = "wild_update:mangrove_propagule_sand"
+	else
+		return itemstack
+	end
+	node_under.param2 = minetest.registered_items[node_under.name].place_param2 or 3
+	if node_under.param2 < 8 and math.random(1,2) == 1 then
+		-- Random horizontal displacement
+		node_under.param2 = node_under.param2 + 8
+	end
+	local def_node = minetest.registered_items[node_under.name]
+	if def_node.sounds then
+		minetest.sound_play(def_node.sounds.place, { gain = 0.5, pos = pos_under }, true)
+	end
+	minetest.set_node(pos_under, node_under)
+	if not minetest.is_creative_enabled(player_name) then
+		itemstack:take_item()
+	end
+
+	return itemstack
+end
+--------------testing----------------
+
+
+minetest.register_node("wild_update:propagule", {
+		description = "propagule",
+	_tt_help = ("Needs soil and light to grow"),
+	_doc_items_longdesc = ("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+	_doc_items_hidden = false,
+	drawtype = "plantlike",
+	node_dig_prediction = "mcl_core:dirt",
+	paramtype = "light",
+	paramtype2 = "leveled",
+	special_tiles = {{name = "mcl_mangrove_propagule.png", tileable_vertical = true}},
+	waving = 2,
+	visual_scale = 1.0,
+	tiles = "mcl_mangrove_propagule.png",
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+	paramtype = "light",
+	sunlight_propagates = true,
+	walkable = false,
+	selection_box = {
+		type = "fixed",
+		fixed = {-5/16, -0.5, -5/16, 5/16, 0.5, 5/16},
+	},
+		stack_max = 64,
+		groups = {
+			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+		sounds = mcl_sounds.node_sound_leaves_defaults(),
+		on_construct = function(pos)
+			local meta = minetest.get_meta(pos)
+			meta:set_int("stage", 0)
+		end,
+		on_place = mcl_util.generate_on_place_plant_function(function(pos, node)
+			local node_below = minetest.get_node_or_nil({x=pos.x,y=pos.y-1,z=pos.z})
+			if not node_below then return false end
+			local nn = node_below.name
+			return ((minetest.get_item_group(nn, "grass_block") == 1) or
+					nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
+					nn=="mcl_core:dirt")
+		end),
+		node_placement_prediction = "",
+		_mcl_blast_resistance = 0,
+		_mcl_hardness = 0,
+	})
+
+
+----------------------------------------------------------
+minetest.register_node("wild_update:propagule", {
+		description = "propagule",
+		_tt_help = ("Needs soil and light to grow"),
+		_doc_items_longdesc = ("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+		_doc_items_hidden = false,
+		drawtype = "plantlike",
+		node_dig_prediction = "mcl_core:dirt",
+		waving = 1,
+		special_tiles = {{name = "mcl_mangrove_propagule.png", tileable_vertical = true}},
+		visual_scale = 1.0,
+		tiles = "mcl_mangrove_propagule.png",
+		inventory_image = "mcl_mangrove_propagule.png",
+		wield_image = "mcl_mangrove_propagule.png",
+		paramtype = "light",
+		sunlight_propagates = true,
+		walkable = false,
+		selection_box = {
+			type = "fixed",
+			fixed = {
+				{ -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
+				{ -0.5, 0.5, -0.5, 0.5, 1.3, 0.5 },
+			},
+		},
+		stack_max = 64,
+		groups = {
+			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+		sounds = mcl_sounds.node_sound_leaves_defaults(),
+		on_construct = function(pos)
+			local meta = minetest.get_meta(pos)
+			meta:set_int("stage", 0)
+		end,
+		on_place = mcl_util.generate_on_place_plant_function(function(pos, node)
+			local node_below = minetest.get_node_or_nil({x=pos.x,y=pos.y-1,z=pos.z})
+			if not node_below then return false end
+			local nn = node_below.name
+			return ((minetest.get_item_group(nn, "grass_block") == 1) or
+					nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
+					nn=="mcl_core:dirt")
+		end),
+		node_placement_prediction = "",
+		_mcl_blast_resistance = 0,
+		_mcl_hardness = 0,
+	})
+end
+
+------------------------------working-------------------
+minetest.register_node("wild_update:propagule", {
+		description = "propagule",
+		_tt_help = ("Needs soil and light to grow"),
+		_doc_items_longdesc = ("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+		_doc_items_hidden = false,
+		drawtype = "plantlike_rooted",
+		waving = 1,
+		special_tiles = {{name = "mcl_mangrove_propagule.png", tileable_vertical = true}},
+		visual_scale = 1.0,
+		tiles = "mcl_mangrove_propagule.png",
+		inventory_image = "mcl_mangrove_propagule.png",
+		wield_image = "mcl_mangrove_propagule.png",
+		paramtype = "light",
+		sunlight_propagates = true,
+		walkable = true,
+		selection_box = {
+			type = "fixed",
+			fixed = {
+				{ -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
+				{ -0.5, 0.5, -0.5, 0.5, 1.3, 0.5 },
+			},
+		},
+		stack_max = 64,
+		groups = {
+			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+		sounds = mcl_sounds.node_sound_leaves_defaults(),
+		on_construct = function(pos)
+			local meta = minetest.get_meta(pos)
+			meta:set_int("stage", 0)
+		end,
+		on_place = mcl_util.generate_on_place_plant_function(function(pos, node)
+			local node_below = minetest.get_node_or_nil({x=pos.x-1,y=pos.y-1,z=pos.z})
+			if not node_below then return false end
+			local nn = node_below.name
+			return ((minetest.get_item_group(nn, "grass_block") == 1) or
+					nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
+					nn=="mcl_core:dirt")
+		end),
+		node_placement_prediction = "mcl_core:dirt",
+		_mcl_blast_resistance = 0,
+		_mcl_hardness = 0,
+	})
