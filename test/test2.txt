@@ -1,0 +1,233 @@
+local function register_sapling(subname, description, longdesc, tt_help, texture, selbox)
+	minetest.register_node("wild_update:"..subname, {
+		description = description,
+		_tt_help = tt_help,
+		_doc_items_longdesc = longdesc,
+		_doc_items_hidden = false,
+		drawtype = 'mesh',
+    		mesh = 'propagule.obj',
+		waving = 1,
+		visual_scale = 1.0,
+		tiles = "mcl_propagule.png",
+		inventory_image = texture,
+		wield_image = texture,
+		paramtype = "light",
+		sunlight_propagates = true,
+		walkable = false,
+		selection_box = {
+	type = "fixed",
+	fixed = {
+		{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
+	},
+},
+		stack_max = 64,
+		groups = {
+			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+		sounds = mcl_sounds.node_sound_leaves_defaults(),
+		on_construct = function(pos)
+			local meta = minetest.get_meta(pos)
+			meta:set_int("stage", 0)
+		end,
+		local p = pointed_thing.above
+		p.y = p.y - 1
+		p.x = p.x - 0
+		p.z = p.z - 0
+		on_place = mcl_util.generate_on_place_plant_function(function(pos, node, pointed_thing.above, value)
+			local node_below = minetest.get_node_or_nil({x=pos.x,y=pos.y-1,z=pos.z})
+			if not node_below then return false end
+			local nn = node_below.name
+			return ((minetest.get_item_group(nn, "grass_block") == 1) or
+					nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
+					nn=="mcl_core:dirt")
+		end),
+		node_placement_prediction = "",
+		_mcl_blast_resistance = 0,
+		_mcl_hardness = 0,
+	})
+end
+-----------------------
+Propagule hanging
+
+local S = minetest.get_translator(minetest.get_current_modname())
+
+minetest.register_node("wild_update:hanging_propagule_1", {
+	description = S("Hanging Propagule"),
+	_tt_help = S("Grows on Mangrove leaves"),
+	_doc_items_longdesc = "",
+	_doc_items_usagehelp = "",
+	groups = {
+			plant = 1, sapling = 1, not_in_creative_inventory=1, non_mycelium_plant = 1, attached_node = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+	paramtype = "light",
+	walkable = false,
+	drop = "wild_update:propagule",
+	drawtype = 'mesh',
+    	mesh = 'hanging_propagule.obj',
+selection_box = {
+	type = "fixed",
+	fixed = {
+		{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
+	},
+},
+	tiles = {"mcl_mangrove_propagule_hanging_0.png"},
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+})
+
+minetest.register_node("mcl_farming:beetroot_0", {
+	description = S("Premature Beetroot Plant (Stage 1)"),
+	_doc_items_longdesc = S("Beetroot plants are plants which grow on farmland under sunlight in 4 stages. On hydrated farmland, they grow a bit faster. They can be harvested at any time but will only yield a profit when mature."),
+	_doc_items_entry_name = S("Premature Beetroot Plant"),
+	paramtype = "light",
+	paramtype2 = "meshoptions",
+	sunlight_propagates = true,
+	place_param2 = 3,
+	walkable = false,
+	drawtype = "plantlike",
+	drop = "mcl_farming:beetroot_seeds",
+	tiles = {"mcl_farming_beetroot_0.png"},
+	inventory_image = "mcl_farming_beetroot_0.png",
+	wield_image = "mcl_farming_beetroot_0.png",
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, -5/16, 0.5}
+		},
+	},
+	groups = {dig_immediate=3, not_in_creative_inventory=1,plant=1,attached_node=1,dig_by_water=1,destroy_by_lava_flow=1,dig_by_piston=1},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	_mcl_blast_resistance = 0,
+})
+
+minetest.register_node("mcl_farming:beetroot_1", {
+	description = S("Premature Beetroot Plant (Stage 2)"),
+	_doc_items_create_entry = false,
+	paramtype = "light",
+	paramtype2 = "meshoptions",
+	sunlight_propagates = true,
+	place_param2 = 3,
+	walkable = false,
+	drawtype = "plantlike",
+	drop = "mcl_farming:beetroot_seeds",
+	tiles = {"mcl_farming_beetroot_1.png"},
+	inventory_image = "mcl_farming_beetroot_1.png",
+	wield_image = "mcl_farming_beetroot_1.png",
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, -3/16, 0.5}
+		},
+	},
+	groups = {dig_immediate=3, not_in_creative_inventory=1,plant=1,attached_node=1,dig_by_water=1,destroy_by_lava_flow=1,dig_by_piston=1},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	_mcl_blast_resistance = 0,
+})
+
+minetest.register_node("mcl_farming:beetroot_2", {
+	description = S("Premature Beetroot Plant (Stage 3)"),
+	_doc_items_create_entry = false,
+	paramtype = "light",
+	paramtype2 = "meshoptions",
+	sunlight_propagates = true,
+	place_param2 = 3,
+	walkable = false,
+	drawtype = "plantlike",
+	drop = "mcl_farming:beetroot_seeds",
+	tiles = {"mcl_farming_beetroot_2.png"},
+	inventory_image = "mcl_farming_beetroot_2.png",
+	wield_image = "mcl_farming_beetroot_2.png",
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, 2/16, 0.5}
+		},
+	},
+	groups = {dig_immediate=3, not_in_creative_inventory=1,plant=1,attached_node=1,dig_by_water=1,destroy_by_lava_flow=1,dig_by_piston=1},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	_mcl_blast_resistance = 0,
+})
+
+minetest.register_node("mcl_farming:beetroot", {
+	description = S("Mature Beetroot Plant"),
+	_doc_items_longdesc = S("A mature beetroot plant is a farming plant which is ready to be harvested for a beetroot and some beetroot seeds. It won't grow any further."),
+	_doc_items_create_entry = true,
+	paramtype = "light",
+	paramtype2 = "meshoptions",
+	sunlight_propagates = true,
+	place_param2 = 3,
+	walkable = false,
+	drawtype = "plantlike",
+	drop = {
+		--[[ drops 1 beetroot guaranteed.
+		drops 0-3 beetroot seeds:
+		0 seeds: 42.18%
+		1 seed:  14.06%
+		2 seeds: 18.75%
+		3 seeds: 25% ]]
+		max_items = 2,
+		items = {
+			{ items = {"mcl_farming:beetroot_item"}, rarity = 1 },
+			{ items = {"mcl_farming:beetroot_seeds 3"}, rarity = 4 },
+			{ items = {"mcl_farming:beetroot_seeds 2"}, rarity = 4 },
+			{ items = {"mcl_farming:beetroot_seeds 1"}, rarity = 4 },
+		},
+	},
+	tiles = {"mcl_farming_beetroot_3.png"},
+	inventory_image = "mcl_farming_beetroot_3.png",
+	wield_image = "mcl_farming_beetroot_3.png",
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, 3/16, 0.5}
+		},
+	},
+	groups = {dig_immediate=3, not_in_creative_inventory=1,plant=1,attached_node=1,dig_by_water=1,destroy_by_lava_flow=1,dig_by_piston=1,beetroot=4},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	_mcl_blast_resistance = 0,
+})
+
+minetest.register_craftitem("mcl_farming:beetroot_item", {
+	description = S("Beetroot"),
+	_doc_items_longdesc = S("Beetroots are both used as food item and a dye ingredient. Pigs like beetroots, too."),
+	_doc_items_usagehelp = S("Hold it in your hand and right-click to eat it. Rightclick an animal to feed it."),
+	inventory_image = "mcl_farming_beetroot.png",
+	wield_image = "mcl_farming_beetroot.png",
+	on_place = minetest.item_eat(1),
+	on_secondary_use = minetest.item_eat(1),
+	groups = {food = 2, eatable = 1, compostability = 65},
+	_mcl_saturation = 1.2,
+})
+
+minetest.register_craftitem("mcl_farming:beetroot_soup", {
+	description = S("Beetroot Soup"),
+	_doc_items_longdesc = S("Beetroot soup is a food item."),
+	stack_max = 1,
+	inventory_image = "mcl_farming_beetroot_soup.png",
+	wield_image = "mcl_farming_beetroot_soup.png",
+	on_place = minetest.item_eat(6, "mcl_core:bowl"),
+	on_secondary_use = minetest.item_eat(6, "mcl_core:bowl"),
+	groups = { food = 3, eatable = 6 },
+	_mcl_saturation = 7.2,
+})
+
+minetest.register_craft({
+	output = "mcl_farming:beetroot_soup",
+	recipe = {
+		{ "mcl_farming:beetroot_item","mcl_farming:beetroot_item","mcl_farming:beetroot_item", },
+		{ "mcl_farming:beetroot_item","mcl_farming:beetroot_item","mcl_farming:beetroot_item", },
+		{ "", "mcl_core:bowl", "" },
+	},
+})
+
+mcl_farming:add_plant("plant_beetroot", "mcl_farming:beetroot", {"mcl_farming:beetroot_0", "mcl_farming:beetroot_1", "mcl_farming:beetroot_2"}, 68, 3)
+
+if minetest.get_modpath("doc") then
+	for i=1,2 do
+		doc.add_entry_alias("nodes", "mcl_farming:beetroot_0", "nodes", "mcl_farming:beetroot_"..i)
+	end
+end
