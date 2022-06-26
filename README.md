@@ -18,7 +18,7 @@ this will have -
 https://www.planetminecraft.com/mod/the-wild-mod-fabric-5373520/
 
 ## Version
-1.4.2
+1.4.3
 
 ## License
 AGNU 3.0 License.
