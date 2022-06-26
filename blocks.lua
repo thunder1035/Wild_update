@@ -215,7 +215,7 @@ minetest.register_node("wild_update:mangrove_stripped_trunk", {
 	description = "The stripped wood of an Mangove tree",
 	_doc_items_longdesc = "The stripped wood of an Mangove tree",
 	_doc_items_hidden = false,
-	tiles ={"mcl_stripped_mangrove_log_side.png","mcl_stripped_mangrove_log_top.png",},
+	tiles ={"mcl_stripped_mangrove_log_top.png","mcl_stripped_mangrove_log_side.png",},
 	paramtype2 = "facedir",
 	on_place = mcl_util.rotate_axis,
 	stack_max = 64,
@@ -329,7 +329,7 @@ minetest.register_node("wild_update:mangrove_roots", {
 		paramtype = "light",
 		paramtype2 = "meshoptions",
 		place_param2 = 1,
-		tiles = { "dirt.png" },
+		tiles = { "default_dirt.png" },
 		special_tiles = { { name = "mcl_mangrove_propagule_item.png" } },
 		inventory_image = "mcl_mangrove_propagule_item.png",
 		wield_image = "mcl_mangrove_propagule.png",
@@ -488,6 +488,8 @@ minetest.override_item("wild_update:propagule",{
 end
 })
 
+local water_tex = "default_water_source_animated.png^[verticalframe:16:0"
+
 minetest.register_node("wild_update:water_logged_roots", {
 	description = ("water_logged_mangrove_roots"),
 	_doc_items_entry_name = S("water_logged_roots"),
@@ -497,9 +499,9 @@ minetest.register_node("wild_update:water_logged_roots", {
 ("These cannot be crafted yet only occure when get in contact of water."),
 	_doc_items_hidden = false,
 	tiles = {
-		"water_logged_roots.png^mcl_mangrove_roots_top.png", "water_logged_roots.png^mcl_mangrove_roots_top.png",
-		"water_logged_roots.png^mcl_mangrove_roots_side.png", "water_logged_roots.png^mcl_mangrove_roots_side.png",
-		"water_logged_roots.png^mcl_mangrove_roots_side.png", "water_logged_roots.png^mcl_mangrove_roots_side.png"
+		"("..water_tex..")^mcl_mangrove_roots_top.png", "("..water_tex..")^mcl_mangrove_roots_top.png",
+		"("..water_tex..")^mcl_mangrove_roots_side.png", "("..water_tex..")^mcl_mangrove_roots_side.png",
+		"("..water_tex..")^mcl_mangrove_roots_side.png", "("..water_tex..")^mcl_mangrove_roots_side.png"
 	},
 	sounds = mcl_sounds.node_sound_water_defaults(),
 	is_ground_content = false,
