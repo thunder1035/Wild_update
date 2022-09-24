@@ -26,3 +26,5 @@ https://minecraft.fandom.com/wiki/Java_Edition_1.19
 ## License
 (code)AGPL-3.0
 (media)CC-by-sa
+All other media files, unless mentioned otherwise, fall under: Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)
+http://creativecommons.org/licenses/by-sa/3.0/
