@@ -21,7 +21,7 @@ https://www.planetminecraft.com/mod/the-wild-mod-fabric-5373520/
 https://minecraft.fandom.com/wiki/Java_Edition_1.19
 
 ## Version
-1.4.4
+1.4.5
 
 ## License
 AGNU 3.0 License.
