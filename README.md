@@ -24,4 +24,5 @@ https://minecraft.fandom.com/wiki/Java_Edition_1.19
 1.4.5
 
 ## License
-AGNU 3.0 License.
+(code)AGPL-3.0
+(media)CC-by-sa
