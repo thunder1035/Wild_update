@@ -7,9 +7,3 @@
 --3)sculk sensors--
 --4)sculk shrieker--
 --5)sculk vein--
-
-local modpath = minetest.get_modpath("mcl_sculk")
-
--- Load files
-
-dofile(modpath .. "/.lua")
