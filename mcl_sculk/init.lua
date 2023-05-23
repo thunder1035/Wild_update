@@ -251,8 +251,24 @@ end
 -- Register mesecon output on sculk sensor
 minetest.register_node("mcl_sculk:sculk_sensor", {
     description = "Sculk Sensor",
-    tiles = {"modname_sculk_sensor.png"},
-    groups = {snappy = 3},
+    tiles = {"mcl_sculk_sensor.png"},
+	drop = "",
+	sounds = sounds,
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_sensor.obj',
+   	collision_box = {
+  	  type = "fixed",
+   	 fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+   	},
+	groups = {handy = 1, hoey = 1, building_block=1, sculk = 1,},
+	place_param2 = 1,
+	is_ground_content = false,
+	on_destruct = sculk_on_destruct,
+	_mcl_blast_resistance = 3,
+	light_source  = 6,
+	_mcl_hardness = 3,
+	_mcl_silk_touch_drop = true,
     --sounds = default.node_sound_stone_defaults(),
     mesecons = {
         effector = {
