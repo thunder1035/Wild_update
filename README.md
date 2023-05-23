@@ -1,5 +1,5 @@
 # The Wild Update
-this modpack is the wild update for mineclone 2 and 5, features all the new thing which minecraft 1.19 has in it.
+this modpack is the wild update for mineclone 2 and 5, features all the new thing which minecraft 1.19 [Wild Update] had in it.
 
 this will have -
 - Mangrove full set + roots
@@ -10,7 +10,6 @@ this will have -
 - Chest Boats
 - Frogs
 - Tadpoles
-- Fireflies
 - Warden
 and more
 
