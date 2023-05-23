@@ -250,8 +250,16 @@ end
 -------------------------------------
 -- Register mesecon output on sculk sensor
 minetest.register_node("mcl_sculk:sculk_sensor", {
-    description = "Sculk Sensor",
-    tiles = {"mcl_sculk_sensor.png"},
+description = "Sculk Sensor",
+tiles = {{
+	name = "mcl_sculk_sensor.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 32,
+		aspect_h = 16,
+		length = 3.0,
+	}}
+},
 	drop = "",
 	sounds = sounds,
 	use_texture_alpha = "clip",
