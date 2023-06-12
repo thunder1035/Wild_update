@@ -1,243 +1,443 @@
+local S = minetest.get_translator("mcl_mangrove")
+local modname = minetest.get_current_modname()
+local modpath = minetest.get_modpath(modname)
 
-local S = minetest.get_translator("mcl_core")
--------------------
+local propagule_allowed_nodes = {
+	"mcl_core:dirt",
+	"mcl_core:coarse_dirt",
+	"mcl_core:dirt_with_grass",
+	"mcl_core:podzol",
+	"mcl_core:mycelium",
+	"mcl_lush_caves:rooted_dirt",
+	"mcl_lush_caves:moss",
+	"mcl_farming:soil",
+	"mcl_farming:soil_wet",
+	"mcl_core:clay",
+	"mcl_mud:mud",
+}
+local propagule_water_nodes = {"mcl_mud:mud","mcl_core:dirt","mcl_core:coarse_dirt","mcl_core:clay"}
+ --"mcl_lush_caves:moss","mcl_lush_caves:rooted_dirt
 
-------------------
-
-local register_tree_trunk = function(subname, description_trunk, description_bark, longdesc, tile_inner, tile_bark)
-minetest.register_node("mcl_mangrove:"..subname, {
-		description = description_trunk,
-		_doc_items_longdesc = longdesc,
-		_doc_items_hidden = false,
-		tiles = {tile_inner, tile_inner, tile_bark},
-		paramtype2 = "facedir",
-		on_place = mcl_util.rotate_axis,
-		stack_max = 64,
-		groups = {handy=1,axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
-		sounds = mcl_sounds.node_sound_wood_defaults(),
-		on_rotate = on_rotate,
-		_mcl_blast_resistance = 2,
-		_mcl_hardness = 2,
-	})
-
-	minetest.register_craft({
-		output = "mcl_mangrove:"..subname.."_bark 3",
-		recipe = {
-			{ "mcl_mangrove:"..subname, "mcl_mangrove:"..subname },
-			{ "mcl_mangrove:"..subname, "mcl_mangrove:"..subname },
-		}
-	})
-end
-
-local register_wooden_planks = function(subname, description, tiles)
-minetest.register_node("mcl_mangrove:"..subname, {
-		description = description,
-		_doc_items_longdesc = doc.sub.items.temp.build,
-		_doc_items_hidden = false,
-		tiles = tiles,
-		stack_max = 64,
-		is_ground_content = false,
-		groups = {handy=1,axey=1, flammable=3,wood=1,building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=20},
-		sounds = mcl_sounds.node_sound_wood_defaults(),
-		_mcl_blast_resistance = 3,
-		_mcl_hardness = 2,
-	})
-end
-
-local register_leaves = function(subname, description, longdesc, tiles, sapling, drop_apples, sapling_chances, leafdecay_distance)
-	local drop
-	if leafdecay_distance == nil then
-		leafdecay_distance = 4
-	end
+local function get_drops(fortune_level)
 	local apple_chances = {200, 180, 160, 120, 40}
 	local stick_chances = {50, 45, 30, 35, 10}
-	
-	local function get_drops(fortune_level)
-		local drop = {
-			max_items = 1,
-			items = {
-				{
-					items = {sapling},
-					rarity = sapling_chances[fortune_level + 1] or sapling_chances[fortune_level]
-				},
-				{
-					items = {"mcl_core:stick 1"},
-					rarity = stick_chances[fortune_level + 1]
-				},
-				{
-					items = {"mcl_core:stick 2"},
-					rarity = stick_chances[fortune_level + 1]
-				},
-			}
-		}
-		if drop_apples then
-			table.insert(drop.items, {
+	local sapling_chances = {20, 16, 12, 10}
+	return {
+		max_items = 1,
+		items = {
+			{
+				items = {"mcl_mangrove:propagule"},
+				rarity = sapling_chances[fortune_level + 1] or sapling_chances[fortune_level]
+			},
+			{
+				items = {"mcl_core:stick 1"},
+				rarity = stick_chances[fortune_level + 1]
+			},
+			{
+				items = {"mcl_core:stick 2"},
+				rarity = stick_chances[fortune_level + 1]
+			},
+			{
 				items = {"mcl_core:apple"},
 				rarity = apple_chances[fortune_level + 1]
-			})
+			}
+		}
+	}
+end
+
+minetest.register_node("mcl_mangrove:mangrove_tree", {
+	description = S("Mangrove Wood"),
+	_doc_items_longdesc = S("The trunk of a Mangrove tree."),
+	_doc_items_hidden = false,
+	tiles = {"mcl_mangrove_log_top.png", "mcl_mangrove_log_top.png", "mcl_mangrove_log.png"},
+	paramtype2 = "facedir",
+	on_place = mcl_util.rotate_axis,
+	after_destruct = mcl_core.update_leaves,
+	groups = {handy=1,axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
+	sounds = mcl_sounds.node_sound_wood_defaults(),
+	_mcl_blast_resistance = 2,
+	_mcl_hardness = 2,
+	_mcl_stripped_variant = "mcl_mangrove:mangrove_stripped_trunk",
+})
+minetest.register_node("mcl_mangrove:mangrove_tree_bark", {
+	description = S("Mangrove Bark"),
+	_doc_items_longdesc = S("The bark of a Mangrove tree."),
+	_doc_items_hidden = false,
+	tiles = {"mcl_mangrove_log.png", "mcl_mangrove_log.png", "mcl_mangrove_log.png"},
+	paramtype2 = "facedir",
+	groups = {handy=1,axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
+	sounds = mcl_sounds.node_sound_wood_defaults(),
+	on_place = mcl_util.rotate_axis,
+	_mcl_blast_resistance = 2,
+	_mcl_hardness = 2,
+	_mcl_stripped_variant = "mcl_mangrove:mangrove_stripped_bark",
+})
+
+minetest.register_node("mcl_mangrove:mangrove_wood", {
+	description = S("Mangrove Wood Planks"),
+	_doc_items_longdesc = doc.sub.items.temp.build,
+	_doc_items_hidden = false,
+	tiles = {"mcl_mangrove_planks.png"},
+
+	is_ground_content = false,
+	groups = {handy=1,axey=1, flammable=3,wood=1,building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=20},
+	sounds = mcl_sounds.node_sound_wood_defaults(),
+	_mcl_blast_resistance = 3,
+	_mcl_hardness = 2,
+})
+
+local l_def = {
+	description = S("Mangrove Leaves"),
+	_doc_items_longdesc = S("mangrove leaves are grown from mangrove trees."),
+	_doc_items_hidden = false,
+	drawtype = "allfaces_optional",
+	waving = 2,
+	tiles = {"mcl_mangrove_leaves.png"},
+	color = "#48B518",
+	paramtype = "light",
+	paramtype2 = "color",
+	palette = "mcl_core_palette_foliage.png",
+	groups = {
+		handy = 1, hoey = 1, shearsy = 1, swordy = 1, dig_by_piston = 1,
+		flammable = 2, fire_encouragement = 30, fire_flammability = 60,
+		leaves = 1, deco_block = 1, compostability = 30, foliage_palette = 1
+	},
+	drop = get_drops(0),
+	_mcl_shears_drop = true,
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	_mcl_blast_resistance = 0.2,
+	_mcl_hardness = 0.2,
+	_mcl_silk_touch_drop = true,
+	_mcl_fortune_drop = { get_drops(1), get_drops(2), get_drops(3), get_drops(4) },
+	on_construct = function(pos)
+		local node = minetest.get_node(pos)
+		if node.param2 == 0 or node.param2 == 1 then -- Check if param2 is 1 as well, since the schematics accidentally have the param2 of mangrove leaves be 1.
+			local new_node = mcl_core.get_foliage_block_type(pos)
+			if new_node.param2 ~= 0 then
+				minetest.swap_node(pos, new_node)
+			end
 		end
-		return drop
-	end
-minetest.register_node("mcl_mangrove:"..subname, {
-		description = description,
-		_doc_items_longdesc = longdesc,
-		_doc_items_hidden = false,
-		drawtype = "allfaces_optional",
-		waving = 2,
-		place_param2 = 1, -- Prevent leafdecay for placed nodes
-		tiles = tiles,
-		paramtype = "light",
-		stack_max = 64,
-		groups = {handy=1,shearsy=1,swordy=1, leafdecay=leafdecay_distance, flammable=2, leaves=1, deco_block=1, dig_by_piston=1, fire_encouragement=30, fire_flammability=60},
-		_mcl_shears_drop = true,
-		sounds = mcl_sounds.node_sound_leaves_defaults(),
-		_mcl_blast_resistance = 0.2,
-		_mcl_hardness = 0.2,
-		_mcl_silk_touch_drop = true,
-		_mcl_fortune_drop = { get_drops(1), get_drops(2), get_drops(3), get_drops(4) },
-	})
-end
+	end,
+	after_place_node = function(pos)
+		mcl_core.make_player_leaves(pos) -- Leaves placed by the player should always be player leaves.
+	end,
+}
 
-local function register_sapling(subname, description, longdesc, tt_help, texture, selbox)
-	minetest.register_node("mcl_mangrove:"..subname, {
-		description = description,
-		_tt_help = tt_help,
-		_doc_items_longdesc = longdesc,
-		_doc_items_hidden = false,
-		drawtype = "plantlike",
-		waving = 1,
-		visual_scale = 1.0,
-		tiles = {texture},
-		inventory_image = texture,
-		wield_image = texture,
-		paramtype = "light",
-		sunlight_propagates = true,
-		walkable = false,
-		selection_box = {
-			type = "fixed",
-			fixed = selbox
-		},
-		stack_max = 64,
-		groups = {
-			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
-			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
-			destroy_by_lava_flow = 1, compostability = 30
-		},
-		sounds = mcl_sounds.node_sound_leaves_defaults(),
-		on_construct = function(pos)
-			local meta = minetest.get_meta(pos)
-			meta:set_int("stage", 0)
-		end,
-		on_place = mcl_util.generate_on_place_plant_function(function(pos, node)
-			local node_under = minetest.get_node_or_nil({x=pos.x,y=pos.y-1,z=pos.z})
-			if not node_under then return false end
-			local nn = node_under.name
-			return ((minetest.get_item_group(nn, "grass_block") == 1) or
-					nn=="mcl_core:podzol" or nn=="mcl_core:podzol_snow" or
-					nn=="mcl_core:dirt")
-		end),
-		node_placement_prediction = "",
-		_mcl_blast_resistance = 0,
-		_mcl_hardness = 0,
-	})
-end
+minetest.register_node("mcl_mangrove:mangroveleaves", l_def)
 
+local o_def = table.copy(l_def)
+o_def._doc_items_create_entry = false
+o_def.groups.not_in_creative_inventory = 1
+o_def.groups.orphan_leaves = 1
+o_def._mcl_shears_drop = {"mcl_mangrove:mangroveleaves"}
+o_def._mcl_silk_touch_drop = {"mcl_mangrove:mangroveleaves"}
 
-------------------------------------------
+minetest.register_node("mcl_mangrove:mangroveleaves_orphan", o_def)
 
----plank,tree,leaves and sampling--
-
-register_tree_trunk("mangrove_tree", S("Mangrove Wood"), S("Mangrove Bark"), S("The trunk of an Mangrove tree."), "mcl_mangrove_log_top.png", "mcl_mangrove_log.png")
-register_wooden_planks("mangrove_wood", S("Mangrove Wood Planks"), {"mcl_mangrove_planks.png"})
-register_sapling("propagule", S("mangrove_propagule"),
-	S("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
-	S("Needs soil and light to grow"),
-	"mcl_mangrove_propagule_item.png", {-5/16, -0.5, -5/16, 5/16, 0.5, 5/16})
-register_leaves("mangroveleaves", S("Mangrove Leaves"), S("mangrove leaves are grown from mangrove trees."), {"mcl_mangrove_leaves.png"}, "", true, {20, 16, 12, 10})
-
-
---other---
-
---stripped mangrove wood--
 minetest.register_node("mcl_mangrove:mangrove_stripped_trunk", {
-	description = "The stripped wood of an Mangove tree",
-	_doc_items_longdesc = "The stripped wood of an Mangove tree",
+	description = S("Stripped Mangrove Wood"),
+	_doc_items_longdesc = S("The stripped wood of a Mangrove tree"),
 	_doc_items_hidden = false,
 	tiles ={"mcl_stripped_mangrove_log_top.png","mcl_stripped_mangrove_log_side.png",},
 	paramtype2 = "facedir",
 	on_place = mcl_util.rotate_axis,
-	stack_max = 64,
 	groups = {handy=1, axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
 	sounds = mcl_sounds.node_sound_wood_defaults(),
-	on_rotate = on_rotate,
+	on_rotate = mcl_util.rotate_axis_and_place,
+	_mcl_blast_resistance = 2,
+	_mcl_hardness = 2,
+})
+minetest.register_node("mcl_mangrove:mangrove_stripped_bark", {
+	description = S("Stripped Mangrove Bark"),
+	_doc_items_longdesc = S("The stripped bark of a Mangrove tree"),
+	_doc_items_hidden = false,
+	tiles ={"mcl_stripped_mangrove_log_side.png","mcl_stripped_mangrove_log_side.png",},
+	paramtype2 = "facedir",
+	on_place = mcl_util.rotate_axis,
+	groups = {handy=1, axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
+	sounds = mcl_sounds.node_sound_wood_defaults(),
+	on_rotate = mcl_util.rotate_axis_and_place,
 	_mcl_blast_resistance = 2,
 	_mcl_hardness = 2,
 })
 
---doors and trapdoors--
+minetest.register_node("mcl_mangrove:mangrove_roots", {
+	description = S("Mangrove Roots"),
+	_doc_items_longdesc = S("Mangrove roots are decorative blocks that form as part of mangrove trees."),
+	_doc_items_hidden = false,
+	waving = 0,
+	place_param2 = 1, -- Prevent leafdecay for placed nodes
+	tiles = {
+		"mcl_mangrove_roots_top.png",
+		"mcl_mangrove_roots_side.png",
+		"mcl_mangrove_roots_side.png",
+	},
+	paramtype = "light",
+	drawtype = "allfaces_optional",
+	groups = {
+		handy = 1, hoey = 1, shearsy = 1, axey = 1, swordy = 1, dig_by_piston = 0,
+		flammable = 10, fire_encouragement = 30, fire_flammability = 60,
+		deco_block = 1, compostability = 30
+	},
+	drop = "mcl_mangrove:mangrove_roots",
+	_mcl_shears_drop = true,
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	_mcl_blast_resistance = 0.7,
+	_mcl_hardness = 0.7,
+	_mcl_silk_touch_drop = true,
+	_mcl_fortune_drop = { "mcl_mangrove:mangrove_roots 1", "mcl_mangrove:mangrove_roots 2", "mcl_mangrove:mangrove_roots 3", "mcl_mangrove:mangrove_roots 4" },
+})
+
+minetest.register_node("mcl_mangrove:propagule", {
+	description = S("Mangrove Propagule"),
+	_tt_help = S("Needs soil and light to grow"),
+	_doc_items_longdesc = S("When placed on soil (such as dirt) and exposed to light, an propagule will grow into an mangrove after some time."),
+	_doc_items_hidden = false,
+	drawtype = "plantlike",
+	waving = 1,
+	visual_scale = 1.0,
+	tiles = {"mcl_mangrove_propagule_item.png"},
+	inventory_image = "mcl_mangrove_propagule_item.png",
+	wield_image = "mcl_mangrove_propagule_item.png",
+	paramtype = "light",
+	sunlight_propagates = true,
+	walkable = false,
+	selection_box = {
+		type = "fixed",
+		fixed = {-5/16, -0.5, -5/16, 5/16, 0.5, 5/16}
+	},
+	groups = {
+		plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,
+		deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+		destroy_by_lava_flow = 1, compostability = 30
+	},
+	sounds = mcl_sounds.node_sound_leaves_defaults(),
+	on_construct = function(pos)
+		local meta = minetest.get_meta(pos)
+		meta:set_int("stage", 0)
+	end,
+	node_placement_prediction = "",
+	_mcl_blast_resistance = 0,
+	_mcl_hardness = 0,
+	on_place = mcl_util.generate_on_place_plant_function(function(place_pos, place_node,stack)
+		local under = vector.offset(place_pos,0,-1,0)
+		local snn = minetest.get_node_or_nil(under).name
+		if not snn then return false end
+		if table.indexof(propagule_allowed_nodes,snn) ~= -1 then
+			local n = minetest.get_node(place_pos)
+			if minetest.get_item_group(n.name,"water") > 0 and table.indexof(propagule_water_nodes,snn) ~= -1 then
+					minetest.set_node(under,{name="mcl_mangrove:propagule_"..snn:split(":")[2]})
+					stack:take_item()
+					return stack
+			end
+			return true
+		end
+	end)
+})
+
+minetest.register_node("mcl_mangrove:hanging_propagule_1", {
+	description = S("Hanging Propagule"),
+	_tt_help = S("Grows on Mangrove leaves"),
+	_doc_items_longdesc = "",
+	_doc_items_usagehelp = "",
+	groups = {
+			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+	paramtype = "light",
+	paramtype2 = "",
+	on_rotate = false,
+	walkable = false,
+	drop = "mcl_mangrove:propagule",
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'propagule_hanging.obj',
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
+		},
+	},
+	tiles = {"mcl_mangrove_propagule_hanging.png"},
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+})
+local propagule_rooted_nodes = {}
+for _,root in pairs(propagule_water_nodes) do
+	local r = root:split(":")[2]
+	local def = minetest.registered_nodes[root]
+	local tx = def.tiles
+	local n = "mcl_mangrove:propagule_"..r
+	table.insert(propagule_rooted_nodes,n)
+	minetest.register_node(n, {
+		drawtype = "plantlike_rooted",
+		paramtype = "light",
+		place_param2 = 1,
+		tiles = tx,
+		special_tiles = { { name = "mcl_mangrove_propagule_item.png" } },
+		inventory_image = "mcl_mangrove_propagule_item.png",
+		wield_image = "mcl_mangrove_propagule.png",
+		selection_box = {
+			type = "fixed",
+			fixed = {
+				{ -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
+				{ -0.5, 0.5, -0.5, 0.5, 1.0, 0.5 },
+			}
+		},
+		groups = {
+			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1,not_in_creative_inventory=1,
+			deco_block = 1, dig_immediate = 3, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+		sounds = mcl_sounds.node_sound_leaves_defaults(),
+		drop = "mcl_mangrove:propagule",
+		node_placement_prediction = "",
+		node_dig_prediction = "",
+		after_dig_node = function(pos)
+			minetest.set_node(pos, {name=root})
+		end,
+		_mcl_hardness = 0,
+		_mcl_blast_resistance = 0,
+		_mcl_silk_touch_drop = true,
+	})
+
+end
+
+
+mcl_flowerpots.register_potted_flower("mcl_mangrove:propagule", {
+	name = "propagule",
+	desc = S("Mangrove Propagule"),
+	image = "mcl_mangrove_propagule.png",
+})
+
+local water_tex = "default_water_source_animated.png^[verticalframe:16:0^[multiply:#3F76E4"
+
+local wlroots = {
+	description = S("water logged mangrove roots"),
+	_doc_items_entry_name = S("water logged mangrove roots"),
+	_doc_items_longdesc =
+		S("Mangrove roots are decorative blocks that form as part of mangrove trees.").."\n\n"..
+		S("Mangrove roots, despite being a full block, can be waterlogged and do not flow water out").."\n\n"..
+		S("These cannot be crafted yet only occure when get in contact of water."),
+	_doc_items_hidden = false,
+	tiles = {
+		{name="default_water_source_animated.png", animation={type="vertical_frames", aspect_w=16, aspect_h=16, length=5.0}}
+	},
+	special_tiles = {
+		-- New-style water source material (mostly unused)
+		{
+			name="default_water_source_animated.png",
+			animation={type="vertical_frames", aspect_w=16, aspect_h=16, length=5.0},
+			backface_culling = false,
+		}
+	},
+	overlay_tiles = {
+		"mcl_mangrove_roots_top.png",
+		"mcl_mangrove_roots_side.png",
+		"mcl_mangrove_roots_side.png",
+	},
+	sounds = mcl_sounds.node_sound_water_defaults(),
+	drawtype = "allfaces_optional",
+	use_texture_alpha = "blend",
+	is_ground_content = false,
+	paramtype = "light",
+	walkable = true,
+	pointable = true,
+	diggable = true,
+	buildable_to = false,
+	liquids_pointable = true,
+	drop = "mcl_mangrove:mangrove_roots",
+	groups = {
+		handy = 1, hoey = 1, water=3, liquid=3, puts_out_fire=1, dig_by_piston = 1, deco_block = 1,  not_in_creative_inventory=1 },
+	_mcl_blast_resistance = 100,
+	_mcl_hardness = -1, -- Hardness intentionally set to infinite instead of 100 (Minecraft value) to avoid problems in creative mode
+	on_construct = function(pos)
+		local dim = mcl_worlds.pos_to_dimension(pos)
+		if dim == "nether" then
+			minetest.sound_play("fire_extinguish_flame", {pos = pos, gain = 0.25, max_hear_distance = 16}, true)
+			minetest.set_node(pos, {name="mcl_mangrove:mangrove_roots"})
+		end
+	end,
+	after_dig_node = function(pos)
+		local node = minetest.get_node(pos)
+		local dim = mcl_worlds.pos_to_dimension(pos)
+		if minetest.get_item_group(node.name, "water") == 0 and dim ~= "nether" then
+			minetest.set_node(pos, {name="mcl_core:water_source"})
+		else
+			minetest.sound_play("fire_extinguish_flame", {pos = pos, gain = 0.25, max_hear_distance = 16}, true)
+		end
+	end,
+}
+local rwlroots = table.copy(wlroots)
+-- FIXME luacheck complains that this is a repeated definition of water_tex.
+-- Maybe the tiles definition below should be replaced with the animated tile
+-- definition as per above?
+water_tex = "default_water_source_animated.png^[verticalframe:16:0^[multiply:#0084FF"
+rwlroots.tiles = {
+	"("..water_tex..")^mcl_mangrove_roots_top.png",
+	"("..water_tex..")^mcl_mangrove_roots_side.png",
+	"("..water_tex..")^mcl_mangrove_roots_side.png",
+}
+rwlroots.after_dig_node = function(pos)
+	local node = minetest.get_node(pos)
+	local dim = mcl_worlds.pos_to_dimension(pos)
+	if minetest.get_item_group(node.name, "water") == 0 and dim ~= "nether" then
+		minetest.set_node(pos, {name="mclx_core:river_water_source"})
+	else
+		minetest.sound_play("fire_extinguish_flame", {pos = pos, gain = 0.25, max_hear_distance = 16}, true)
+	end
+end
+
+minetest.register_node("mcl_mangrove:water_logged_roots", wlroots)
+minetest.register_node("mcl_mangrove:river_water_logged_roots",rwlroots)
+
+minetest.register_node("mcl_mangrove:mangrove_mud_roots", {
+	description = S("Muddy Mangrove Roots"),
+	_tt_help = S("crafted with Mud and Mangrove roots"),
+	_doc_items_longdesc = S("Muddy Mangrove Roots is a block from mangrove swamp.It drowns player a bit inside it."),
+	tiles = {
+		"mcl_mud.png^mcl_mangrove_roots_top.png",
+		"mcl_mud.png^mcl_mangrove_roots_side.png",
+		"mcl_mud.png^mcl_mangrove_roots_side.png",
+	},
+	is_ground_content = true,
+	groups = {handy = 1, shovely = 1, axey = 1, building_block = 1},
+	sounds = mcl_sounds.node_sound_sand_defaults(),
+	_mcl_blast_resistance = 0.7,
+	_mcl_hardness = 0.7,
+})
 
 mcl_doors:register_door("mcl_mangrove:mangrove_door", {
-	description = ("Mangrove Door"),
-	_doc_items_longdesc = wood_longdesc,
-	_doc_items_usagehelp = wood_usagehelp,
+	description = S("Mangrove Door"),
+	_doc_items_longdesc = S("Wooden doors are 2-block high barriers which can be opened or closed by hand and by a redstone signal."),
+	_doc_items_usagehelp = S("To open or close a wooden door, rightclick it or supply its lower half with a redstone signal."),
 	inventory_image = "mcl_mangrove_doors.png",
 	groups = {handy=1,axey=1, material_wood=1, flammable=-1},
 	_mcl_hardness = 3,
 	_mcl_blast_resistance = 3,
-	tiles_bottom = {"mcl_mangrove_door_bottom.png", "mcl_mangrove_planks.png"},
-	tiles_top = {"mcl_mangrove_door_top.png", "mcl_mangrove_planks.png"},
+	tiles_bottom = {"mcl_mangrove_door_bottom.png", "mcl_doors_door_mangrove_side_lower.png"},
+	tiles_top = {"mcl_mangrove_door_top.png", "mcl_doors_door_mangrove_side_upper.png"},
 	sounds = mcl_sounds.node_sound_wood_defaults(),
 })
 
-minetest.register_craft({
-	output = "mcl_doors:mangrove_door 3",
-	recipe = {
-		{"mcl_mangrove:mangrove_wood", "mcl_mangrove:mangrove_wood"}, 
-		{"mcl_mangrove:mangrove_wood", "mcl_mangrove:mangrove_wood"}, 
-		{"mcl_mangrove:mangrove_wood", "mcl_mangrove:mangrove_wood"}, 
-	}
+mcl_doors:register_trapdoor("mcl_mangrove:mangrove_trapdoor", {
+	description = S("Mangrove Trapdoor"),
+	_doc_items_longdesc = S("Wooden trapdoors are horizontal barriers which can be opened and closed by hand or a redstone signal. They occupy the upper or lower part of a block, depending on how they have been placed. When open, they can be climbed like a ladder."),
+	_doc_items_usagehelp = S("To open or close the trapdoor, rightclick it or send a redstone signal to it."),
+	tile_front = "mcl_mangrove_trapdoor.png",
+	tile_side = "mcl_mangrove_planks.png",
+	wield_image = "mcl_mangrove_trapdoor.png",
+	groups = {handy=1,axey=1, mesecon_effector_on=1, material_wood=1, flammable=-1},
+	_mcl_hardness = 3,
+	_mcl_blast_resistance = 3,
+	sounds = mcl_sounds.node_sound_wood_defaults(),
 })
-
-local woods = {
-	-- id, desc, texture, craftitem
-	{ "trapdoor", S("Mangrove Trapdoor"), "mcl_mangrove_trapdoor.png", "mcl_mangrove_planks.png", "mcl_mangrove:mangrove_wood" },}
-
-for w=1, #woods do
-	mcl_doors:register_trapdoor("mcl_mangrove:"..woods[w][1], {
-		description = woods[w][2],
-		_doc_items_longdesc = S("Wooden trapdoors are horizontal barriers which can be opened and closed by hand or a redstone signal. They occupy the upper or lower part of a block, depending on how they have been placed. When open, they can be climbed like a ladder."),
-		_doc_items_usagehelp = S("To open or close the trapdoor, rightclick it or send a redstone signal to it."),
-		tile_front = woods[w][3],
-		tile_side = woods[w][4],
-		wield_image = woods[w][3],
-		groups = {handy=1,axey=1, mesecon_effector_on=1, material_wood=1, flammable=-1},
-		_mcl_hardness = 3,
-		_mcl_blast_resistance = 3,
-		sounds = mcl_sounds.node_sound_wood_defaults(),
-	})
-
-minetest.register_craft({
-		output = "mcl_doors:"..woods[w][1].." 2",
-		recipe = {
-			{woods[w][5], woods[w][5], woods[w][5]},
-			{woods[w][5], woods[w][5], woods[w][5]},
-		}
-	})
-
-	minetest.register_craft({
-		type = "fuel",
-		recipe = "mcl_doors:"..woods[w][1],
-		burntime = 15,
-	})
-end
-
--------------------------------
-
---fence and fence gates--
 
 mcl_fences.register_fence_and_fence_gate(
 	"mangrove_wood_fence",
-	S("Mangrove Wood Fence"), S("Mangrove Wood Plank Fence"),
+	S("Mangrove Wood Fence"),
+	S("Mangrove Wood Fence Gate"),
 	"mcl_mangrove_fence.png",
 	{handy=1,axey=1, flammable=2,fence_wood=1, fire_encouragement=5, fire_flammability=20},
 	minetest.registered_nodes["mcl_core:wood"]._mcl_hardness,
@@ -245,6 +445,64 @@ mcl_fences.register_fence_and_fence_gate(
 	{"group:fence_wood"},
 	mcl_sounds.node_sound_wood_defaults(), "mcl_mangrove_mangrove_wood_fence_gate_open", "mcl_mangrove_mangrove_wood_fence_gate_close", 1, 1,
 	"mcl_mangrove_fence_gate.png")
+
+mcl_stairs.register_stair("mangrove_wood", "mcl_mangrove:mangrove_wood",
+	{handy=1,axey=1, flammable=3,wood_stairs=1, material_wood=1, fire_encouragement=5, fire_flammability=20},
+	{"mcl_mangrove_planks.png"},
+	S("Mangrove Wood Stairs"),
+	mcl_sounds.node_sound_wood_defaults(), 3, 2,
+	"woodlike")
+
+mcl_stairs.register_slab("mangrove_wood", "mcl_mangrove:mangrove_wood",
+	{handy=1,axey=1, flammable=3,wood_slab=1, material_wood=1, fire_encouragement=5, fire_flammability=20},
+	{"mcl_mangrove_planks.png"},
+	S("Mangrove Wood Slab"),
+	mcl_sounds.node_sound_wood_defaults(), 3, 2,
+	S("Double Mangrove Wood Slab"))
+
+minetest.register_craft({
+	output = "mcl_mangrove:mangrove_tree_bark 3",
+	recipe = {
+		{ "mcl_mangrove:mangrove_tree", "mcl_mangrove:mangrove_tree" },
+		{ "mcl_mangrove:mangrove_tree", "mcl_mangrove:mangrove_tree" },
+	}
+})
+
+minetest.register_craft({
+	output = "mcl_mangrove:mangrove_mud_roots",
+	recipe = {
+		{"mcl_mangrove:mangrove_roots", "mcl_mud:mud",},
+	}
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "mcl_mangrove:mangrove_door",
+	burntime = 15,
+})
+
+minetest.register_craft({
+	output = "mcl_mangrove:mangrove_door 3",
+	recipe = {
+		{"mcl_mangrove:mangrove_wood", "mcl_mangrove:mangrove_wood"},
+		{"mcl_mangrove:mangrove_wood", "mcl_mangrove:mangrove_wood"},
+		{"mcl_mangrove:mangrove_wood", "mcl_mangrove:mangrove_wood"},
+	}
+})
+
+minetest.register_craft({
+	output = "mcl_mangrove:mangrove_trapdoor 2",
+	recipe = {
+		{"mcl_mangrove:mangrove_wood","mcl_mangrove:mangrove_wood","mcl_mangrove:mangrove_wood"},
+		{"mcl_mangrove:mangrove_wood","mcl_mangrove:mangrove_wood","mcl_mangrove:mangrove_wood"},
+	}
+})
+
+minetest.register_craft({
+	type = "fuel",
+	recipe = "mcl_mangrove:mangrove_trapdoor",
+	burntime = 15,
+})
 
 minetest.register_craft({
 		output = "mcl_mangrove:mangrove_wood_fence_gate",
@@ -275,434 +533,65 @@ minetest.register_craft({
 	burntime = 15,
 })
 
----stairs and slabs---
+local adjacents = {
+	vector.new(1,0,0),
+	vector.new(-1,0,0),
+	vector.new(0,0,1),
+	vector.new(0,0,-1),
+}
 
-local woods = {
-	{ "mangrove_wood", "mcl_mangrove_planks.png", S("Mangrove Wood Stairs"), S("Mangrove Wood Slab"), S("Double Mangrove Wood Slab") },}
-
-for w=1, #woods do
-	local wood = woods[w]
-	mcl_stairs.register_stair(wood[1], "mcl_core:"..wood[1],
-			{handy=1,axey=1, flammable=3,wood_stairs=1, material_wood=1, fire_encouragement=5, fire_flammability=20},
-			{wood[2]},
-			wood[3],
-			mcl_sounds.node_sound_wood_defaults(), 3, 2,
-			"woodlike")
-	mcl_stairs.register_slab(wood[1], "mcl_core:"..wood[1],
-			{handy=1,axey=1, flammable=3,wood_slab=1, material_wood=1, fire_encouragement=5, fire_flammability=20},
-			{wood[2]},
-			wood[4],
-			mcl_sounds.node_sound_wood_defaults(), 3, 2,
-			wood[5])
-end
-
-minetest.register_node("mcl_mangrove:mangrove_roots", {
-	description = "Mangrove_Roots",
-	_doc_items_longdesc = "Mangrove roots are decorative blocks that form as part of mangrove trees.",
-	_doc_items_hidden = false,
-	waving = 0,
-	place_param2 = 1, -- Prevent leafdecay for placed nodes
-	tiles = {
-		"mcl_mangrove_roots_top.png", "mcl_mangrove_roots_top.png",
-		"mcl_mangrove_roots_side.png", "mcl_mangrove_roots_side.png",
-		"mcl_mangrove_roots_side.png", "mcl_mangrove_roots_side.png"
-	},
-	paramtype = "light",
-	stack_max = 64,
-	drawtype = "mesh",
-	mesh = "node.obj",
-	groups = {
-		handy = 1, hoey = 1, shearsy = 1, axey = 1,  swordy = 1, dig_by_piston = 0,
-		leaves = 1, leafdecay = leafdecay_distance, deco_block = 1,
-		flammable = 10, fire_encouragement = 30, fire_flammability = 60,
-		compostability = 30
-	},
-	drop = "mcl_mangrove:mangrove_roots", 
-	_mcl_shears_drop = true,
-	sounds = mcl_sounds.node_sound_leaves_defaults(),			_mcl_blast_resistance = 0.7,
-	_mcl_hardness = 0.7,
-	_mcl_silk_touch_drop = true,
-	_mcl_fortune_drop = { "mcl_mangrove:mangrove_roots 1", "mcl_mangrove:mangrove_roots 2", "mcl_mangrove:mangrove_roots 3", "mcl_mangrove:mangrove_roots 4" },
-})
-
---water can be placed in mangrove roots--
-minetest.override_item("mcl_buckets:bucket_water",{
-		on_place = function(itemstack, user, pointed_thing)
-		-- Use pointed node's on_rightclick function first, if present
-		local node = minetest.get_node(pointed_thing.under)
-		if user and not user:get_player_control().sneak then
-			if minetest.registered_nodes[node.name] and minetest.registered_nodes[node.name].on_rightclick then
-				return minetest.registered_nodes[node.name].on_rightclick (pointed_thing.under, node, user, itemstack) or itemstack
-			end
-		end
-
-		-- Place on roots 
-		if pointed_thing.under and node.name == "mcl_mangrove:mangrove_roots" then
-			local protname = user:get_player_name()
-			if minetest.is_protected(pointed_thing.under, protname) then
-				minetest.record_protection_violation(pointed_thing.under, protname)
-				return itemstack
-			end
-			minetest.set_node(pointed_thing.under, { name = "mcl_mangrove:water_logged_roots", param2 = node.param2 })
-			minetest.sound_play("mcl_potions_bottle_pour", {pos=pointed_thing.under, gain=0.9, max_hear_range=16}, true)
-				if minetest.is_creative_enabled(user:get_player_name()) then
-					return itemstack
+minetest.register_abm({
+	label = "Waterlog mangrove roots",
+	nodenames = {"mcl_mangrove:mangrove_roots"},
+	neighbors = {"group:water"},
+	interval = 5,
+	chance = 5,
+	action = function(pos,value)
+		for _,v in pairs(adjacents) do
+			local n = minetest.get_node(vector.add(pos,v)).name
+			if minetest.get_item_group(n,"water") > 0 then
+				if n:find("river") then
+					minetest.swap_node(pos,{name="mcl_mangrove:river_water_logged_roots"})
+					return
 				else
-					return "mcl_buckets:bucket_empty"
+					minetest.swap_node(pos,{name="mcl_mangrove:water_logged_roots"})
+					return
+				end
 			end
-		end
-end
-})
-
-----flower_potted----------------
-mcl_flowerpots.register_potted_flower("mcl_mangrove:propagule", {
-	name = "propagule",
-	desc = S("Mangrove Propagule"),
-	image = "mcl_mangrove_propagule.png",
-})
-
---------------------------------------
---------------------propagule------------------------------
-
---nodes to be changed into--
-
-	minetest.register_node("mcl_mangrove:propagule_dirt", {
-		description = "propagule_dirt",
-		_doc_items_longdesc = "",
-		_tt_help = "",
-		drawtype = "plantlike_rooted",
-		paramtype = "light",
-		paramtype2 = "meshoptions",
-		place_param2 = 1,
-		tiles = { "default_dirt.png" },
-		special_tiles = { { name = "mcl_mangrove_propagule_item.png" } },
-		inventory_image = "mcl_mangrove_propagule_item.png",
-		wield_image = "mcl_mangrove_propagule.png",
-		selection_box = {
-			type = "fixed",
-			fixed = {
-				{ -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-				{ -0.5, 0.5, -0.5, 0.5, 1.0, 0.5 },
-			}
-		},
-		groups = {
-			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1, not_in_creative_inventory=1,
-			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
-			destroy_by_lava_flow = 1, compostability = 30
-		},
-		sounds = mcl_sounds.node_sound_leaves_defaults(),
-		drop = "mcl_mangrove:propagule",
-		node_placement_prediction = "",
-		node_dig_prediction = "mcl_core:dirt",
-		after_dig_node = function(pos)
-			local node = minetest.get_node(pos)
-			if minetest.get_item_group(node.name, "dirt") == 0 then
-				minetest.set_node(pos, {name="mcl_core:dirt"})
-			end
-		end,
-		_mcl_hardness = 0,
-		_mcl_blast_resistance = 0,
-		_mcl_silk_touch_drop = true,
-	})
-
-	minetest.register_node("mcl_mangrove:propagule_mud", {
-		description = "propagule_mud",
-		_doc_items_longdesc = "",
-		_tt_help = "",
-		drawtype = "plantlike_rooted",
-		paramtype = "light",
-		paramtype2 = "meshoptions",
-		place_param2 = 1,
-		tiles = {"mcl_mud.png"},
-		special_tiles = { { name = "mcl_mangrove_propagule_item.png" } },
-		inventory_image = "mcl_mangrove_propagule_item.png",
-		wield_image = "mcl_mangrove_propagule.png",
-		collision_box = {
-		type = "fixed",
-		fixed = { -0.5, -0.5, -0.5, 0.5, 0.5 - 2/16, 0.5 },
-	},
-		selection_box = {
-			type = "fixed",
-			fixed = {
-				{ -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-				{ -0.5, 0.5, -0.5, 0.5, 1.0, 0.5 },
-			}
-		},
-		groups = {
-			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1, not_in_creative_inventory=1,
-			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
-			destroy_by_lava_flow = 1, compostability = 30
-		},
-		sounds = mcl_sounds.node_sound_leaves_defaults(),
-		drop = "mcl_mangrove:propagule",
-		node_placement_prediction = "",
-		node_dig_prediction = "mcl_mud:mud",
-		after_dig_node = function(pos)
-			local node = minetest.get_node(pos)
-			if minetest.get_item_group(node.name, "dirt") == 0 then
-				minetest.set_node(pos, {name="mcl_mud:mud"})
-			end
-		end,
-		_mcl_hardness = 0,
-		_mcl_blast_resistance = 0,
-		_mcl_silk_touch_drop = true,
-	})
-
-minetest.register_node("mcl_mangrove:propagule_dirt_with_grass", {
-		description = "propagule_dirt_with_grass_",
-		_doc_items_longdesc = "",
-		_tt_help = "",
-		drawtype = "plantlike_rooted",
-		paramtype = "meshoption",
-		paramtype2 = "color",
-		tiles = {"mcl_core_grass_block_top.png", { name="default_dirt.png", color="white" }},
-		overlay_tiles = {"mcl_core_grass_block_top.png", "", {name="mcl_core_grass_block_side_overlay.png", tileable_vertical=false}},
-		palette = "mcl_core_palette_grass.png",
-		palette_index = 0,
-		color = "#8EB971",
-		special_tiles = { { name = "mcl_mangrove_propagule_item.png" } },
-		inventory_image = "mcl_mangrove_propagule_item.png",
-		wield_image = "mcl_mangrove_propagule.png",
-		collision_box = {
-		type = "fixed",
-		fixed = { -0.5, -0.5, -0.5, 0.5, 0.5 - 2/16, 0.5 },
-	},
-		selection_box = {
-			type = "fixed",
-			fixed = {
-				{ -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-				{ -0.5, 0.5, -0.5, 0.5, 1.0, 0.5 },
-			}
-		},
-		groups = {
-			plant = 1, sapling = 1, non_mycelium_plant = 1, attached_node = 1, not_in_creative_inventory=1,
-			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
-			destroy_by_lava_flow = 1, compostability = 30
-		},
-		sounds = mcl_sounds.node_sound_leaves_defaults(),
-		drop = "mcl_mangrove:propagule",
-		node_placement_prediction = "",
-		node_dig_prediction = "mcl_core:dirt_with_grass",
-		after_dig_node = function(pos)
-			local node = minetest.get_node(pos)
-			if minetest.get_item_group(node.name, "dirt") == 0 then
-				minetest.set_node(pos, {name="mcl_core:dirt_with_grass"})
-			end
-		end,
-		_mcl_hardness = 0,
-		_mcl_blast_resistance = 0,
-		_mcl_silk_touch_drop = true,
-	})
-
-
-------------------------
--- node changer--
-minetest.override_item("mcl_mangrove:propagule",{
-		on_place = function(itemstack, user, pointed_thing)
-		-- Use pointed node's on_rightclick function first, if present
-		local node = minetest.get_node(pointed_thing.under)
-		if user and not user:get_player_control().sneak then
-			if minetest.registered_nodes[node.name] and minetest.registered_nodes[node.name].on_rightclick then
-				return minetest.registered_nodes[node.name].on_rightclick (pointed_thing.under, node, user, itemstack) or itemstack
-			end
-		end
-
-		-- Place on dirt 
-		if pointed_thing.under and node.name == "mcl_core:dirt"  then
-			local protname = user:get_player_name()
-			if minetest.is_protected(pointed_thing.under, protname) then
-				minetest.record_protection_violation(pointed_thing.under, protname)
-				return itemstack
-			end
-			minetest.set_node(pointed_thing.under, { name = "mcl_mangrove:propagule_dirt", param2 = node.param2 })
-			minetest.sound_play(mcl_sounds.node_sound_leaves_defaults{pos=pointed_thing.under, gain=0.5, max_hear_range=16}, true)
-			if not minetest.is_creative_enabled(user:get_player_name()) then
-				itemstack:take_item(1) -- 1 use
-			return itemstack
 		end
 	end
-
--- Place on dirt _with_grass
-		if pointed_thing.under and node.name == "mcl_core:dirt_with_grass"  then
-			local protname = user:get_player_name()
-			if minetest.is_protected(pointed_thing.under, protname) then
-				minetest.record_protection_violation(pointed_thing.under, protname)
-				return itemstack
-			end
-			minetest.set_node(pointed_thing.under, { name = "mcl_mangrove:propagule_dirt_with_grass", param2 = node.param2 })
-			minetest.sound_play(mcl_sounds.node_sound_leaves_defaults{pos=pointed_thing.under, gain=0.5, max_hear_range=16}, true)
-			if not minetest.is_creative_enabled(user:get_player_name()) then
-				itemstack:take_item(1) -- 1 use
-			return itemstack
-		end
-	end
-
--- Place on mud 
-	if pointed_thing.under and node.name == "mcl_mud:mud" then
-			local protname = user:get_player_name()
-			if minetest.is_protected(pointed_thing.under, protname) then
-				minetest.record_protection_violation(pointed_thing.under, protname)
-				return itemstack
-			end
-			minetest.set_node(pointed_thing.under, { name = "mcl_mangrove:propagule_mud", param2 = node.param2 })
-			minetest.sound_play(mcl_sounds.node_sound_leaves_defaults{pos=pointed_thing.under, gain=0.5, max_hear_range=16}, true)
-			if not minetest.is_creative_enabled(user:get_player_name()) then
-				itemstack:take_item(1) -- 1 use
-			return itemstack
-		end
-	end
-end
 })
 
-----------------------------------------------------------------
-
---water can be taken from mangrove water roots--
-minetest.override_item("mcl_buckets:bucket_empty",{
-		on_place = function(itemstack, user, pointed_thing)
-		-- Use pointed node's on_rightclick function first, if present
-		local node = minetest.get_node(pointed_thing.under)
-		if user and not user:get_player_control().sneak then
-			if minetest.registered_nodes[node.name] and minetest.registered_nodes[node.name].on_rightclick then
-				return minetest.registered_nodes[node.name].on_rightclick (pointed_thing.under, node, user, itemstack) or itemstack
+local abm_nodes = table.copy(propagule_rooted_nodes)
+table.insert(abm_nodes,"mcl_mangrove:propagule")
+minetest.register_abm({
+	label = "Mangrove_tree_growth",
+	nodenames = abm_nodes,
+	interval = 30,
+	chance = 5,
+	action = function(pos,node)
+		local pr = PseudoRandom(pos.x+pos.y+pos.z)
+		local r = pr:next(1,5)
+		local path = modpath .."/schematics/mcl_mangrove_tree_"..tostring(r)..".mts"
+		local w = 5
+		local h = 10
+		local fp = true
+		pos.y = pos.y - 1
+		if table.indexof(propagule_rooted_nodes,node.name) ~= -1 then
+			local nn = minetest.find_nodes_in_area(vector.offset(pos,0,-1,0),vector.offset(pos,0,h,0),{"group:water","air"})
+			if #nn >= h then
+				minetest.place_schematic(pos, path, "random", function()
+				mcl_core.update_sapling_foliage_colors(pos)
+				local nnv = minetest.find_nodes_in_area(vector.offset(pos,-5,-1,-5),vector.offset(pos,5,h/2,5),{"mcl_core:vine"})
+				minetest.bulk_set_node(nnv,{"air"})
+				end, true, "place_center_x, place_center_z")
 			end
+			return
 		end
-
-		-- Place on water roots 
-		if pointed_thing.under and node.name == "mcl_mangrove:water_logged_roots" then
-			local protname = user:get_player_name()
-			if minetest.is_protected(pointed_thing.under, protname) then
-				minetest.record_protection_violation(pointed_thing.under, protname)
-				return itemstack
-			end
-			minetest.set_node(pointed_thing.under, { name = "mcl_mangrove:mangrove_roots", param2 = node.param2 })
-			minetest.sound_play("mcl_potions_bottle_pour", {pos=pointed_thing.under, gain=0.9, max_hear_range=16}, true)
-				if minetest.is_creative_enabled(user:get_player_name()) then
-					return itemstack
-				else
-					return "mcl_buckets:bucket_water"
-			end
-		end
-end
-})
-local water_tex = "default_water_source_animated.png^[verticalframe:16:0"
-
-
-minetest.register_node("mcl_mangrove:water_logged_roots", {
-	description = ("water_logged_mangrove_roots"),
-	_doc_items_entry_name = S("water_logged_roots"),
-	_doc_items_longdesc =
-("Mangrove roots are decorative blocks that form as part of mangrove trees.").."\n\n"..
-("Mangrove roots, despite being a full block, can be waterlogged and do not flow water out").."\n\n"..
-("These cannot be crafted yet only occure when get in contact of water."),
-	_doc_items_hidden = false,
-	tiles = {
-		"("..water_tex..")^mcl_mangrove_roots_top.png", "("..water_tex..")^mcl_mangrove_roots_top.png",
-		"("..water_tex..")^mcl_mangrove_roots_side.png", "("..water_tex..")^mcl_mangrove_roots_side.png",
-		"("..water_tex..")^mcl_mangrove_roots_side.png", "("..water_tex..")^mcl_mangrove_roots_side.png"
-	},
-	sounds = mcl_sounds.node_sound_water_defaults(),
-	use_texture_alpha = USE_TEXTURE_ALPHA,
-	is_ground_content = false,
-	paramtype = "light",
-	walkable = true,
-	pointable = true,
-	diggable = true,
-	buildable_to = flase,
-	liquids_pointable = true,
-	drop = "mcl_mangrove:mangrove_roots",
-	stack_max = 64,
-		groups = {
-		handy = 1, hoey = 1, shearsy = 1, swordy = 1, water=3, liquid=3, puts_out_fire=1, dig_by_piston = 1,
-		leaves = 1, leafdecay = leafdecay_distance, deco_block = 1,  not_in_creative_inventory=1, fire_encouragement = 0, fire_flammability = 0,
-	},
-	_mcl_blast_resistance = 100,
-	-- Hardness intentionally set to infinite instead of 100 (Minecraft value) to avoid problems in creative mode
-	_mcl_hardness = -1,
-	after_dig_node = function(pos)
-		local node = minetest.get_node(pos)
-		if minetest.get_item_group(node.name, "water") == 0 then
-			minetest.set_node(pos, {name="mcl_core:water_source"})
+		if r > 3 then h = 18 end
+		if mcl_core.check_growth_width(pos,w,h) then
+			minetest.place_schematic(pos, path, "random", nil, true, "place_center_x, place_center_z")
+			mcl_core.update_sapling_foliage_colors(pos)
 		end
 	end,
 })
-
-------------------------
-if minetest.get_modpath("mcl_mud") then
-minetest.register_node("mcl_mangrove:mangrove_mud_roots", {
-	description = S("Muddy Mangrove Roots"),
-	_tt_help = S("crafted with Mud and Mangrove roots"),
-	_doc_items_longdesc = S("Muddy Mangrove Roots is a block from mangrove swamp.It drowns player a bit inside it"),
-	stack_max = 64,
-	tiles = {
-	"mcl_mud.png^mcl_mangrove_roots_top.png", "mcl_mud.png^mcl_mangrove_roots_top.png",
-	"mcl_mud.png^mcl_mangrove_roots_side.png", "mcl_mud.png^mcl_mangrove_roots_side.png",
-	"mcl_mud.png^mcl_mangrove_roots_side.png", "mcl_mud.png^mcl_mangrove_roots_side.png",
-},
-	is_ground_content = true,
-	groups = {handy = 1, shovely = 1, axey = 1, building_block = 1},
-	sounds = mcl_sounds.node_sound_sand_defaults(),
-	_mcl_blast_resistance = 0.7,
-	_mcl_hardness = 0.7,
-})
-
---------craft----------
-
-minetest.register_craft({
-		output = "mcl_mangrove:mangrove_mud_roots",
-		recipe = {
-			{"mcl_mangrove:mangrove_roots", "mcl_mud:mud",},
-		}
-	})
-
-end
-
-------hanging_propagule-----------
-minetest.register_node("mcl_mangrove:hanging_propagule_1", {
-	description = S("Hanging Propagule"),
-	_tt_help = S("Grows on Mangrove leaves"),
-	_doc_items_longdesc = "",
-	_doc_items_usagehelp = "",
-	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
-			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
-			destroy_by_lava_flow = 1, compostability = 30
-		},
-	paramtype = "light",
-	paramtype2 = "",
-	on_rotate = false,
-	walkable = false,
-	drop = "mcl_mangrove:propagule",
-	use_texture_alpha = "clip",
-	drawtype = 'mesh',
-    	mesh = 'propagule_hanging.obj',
-selection_box = {
-	type = "fixed",
-	fixed = {
-		{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
-	},
-},
-	tiles = {"mcl_mangrove_propagule_hanging.png"},
-	inventory_image = "mcl_mangrove_propagule.png",
-	wield_image = "mcl_mangrove_propagule.png",
-})
-
-------------tree_growth_abm------------
-
-local propagule_nodes = {"mcl_mangrove:propagule_dirt",
-		        "mcl_mangrove:propagule_mud",
-		        "mcl_mangrove:propagule_dirt_with_grass"
-}
-
-
---minetest.register_abm({
---	label = "Mangrove_tree_growth",
---	nodenames = propagule_nodes,
---	interval = 2,
---	chance = 1,
---	action = function(pos,value)
---		local path = minetest.get_modpath("mcl_mangrove") .. --"/schematics/mcl_mangrove_tree_1.mts",
---		minetest.place_schematic({x = pos.x - 3, y = pos.y - 0, z = pos.z - 4}, --path, -"random", nil, false)
---end
---})
-
-----------------------------------------------------------
