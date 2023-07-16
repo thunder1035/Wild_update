@@ -20,7 +20,7 @@ https://www.planetminecraft.com/mod/the-wild-mod-fabric-5373520/
 https://minecraft.fandom.com/wiki/Java_Edition_1.19
 
 ## Version
-1.4.5
+1.4.6
 
 ## License
 (code)AGPL-3.0
