@@ -1,15 +1,17 @@
 TODO-
-(A)easy
+(A)easy(done)
 1)propagule
 2)water logged roots
 3)Mud bricks (stair,slab,wall)
 4)mangrove tree.mts and mangrove swamp biome
-(B)novice hard
+--------------------------------
+(B)novice hard(done)
 1)dirt to mud conversion
 2)sculk blocks(models(do not have the main features))
 3)normal blocks to sculk blocks, and its overlay
 4)boat with chest(model(not having main functions))
-(C)hard
+--------------------------------
+(C)hard(WIP)
 1)frog and frog spawn
 2)froglight
 3)items-
@@ -19,6 +21,7 @@ bucket of tadpole, Disc fragments, Echo shards, Music Disc 5
 2)sculk blocks functions(real_work(main))
 3)swift sneak enchantment book
 4)warden,spawning time,darkness
+--------------------------------
 D)super hard
 1)anicient city and deepdark
 2)allay
