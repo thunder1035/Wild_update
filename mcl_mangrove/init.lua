@@ -18,148 +18,20 @@ local propagule_allowed_nodes = {
 local propagule_water_nodes = {"mcl_mud:mud","mcl_core:dirt","mcl_core:coarse_dirt","mcl_core:clay"}
  --"mcl_lush_caves:moss","mcl_lush_caves:rooted_dirt
 
-local function get_drops(fortune_level)
-	local apple_chances = {200, 180, 160, 120, 40}
-	local stick_chances = {50, 45, 30, 35, 10}
-	local sapling_chances = {20, 16, 12, 10}
-	return {
-		max_items = 1,
-		items = {
-			{
-				items = {"mcl_mangrove:propagule"},
-				rarity = sapling_chances[fortune_level + 1] or sapling_chances[fortune_level]
-			},
-			{
-				items = {"mcl_core:stick 1"},
-				rarity = stick_chances[fortune_level + 1]
-			},
-			{
-				items = {"mcl_core:stick 2"},
-				rarity = stick_chances[fortune_level + 1]
-			},
-			{
-				items = {"mcl_core:apple"},
-				rarity = apple_chances[fortune_level + 1]
-			}
-		}
-	}
-end
+mcl_core.register_tree_trunk("mangrove_tree", S("Mangrove Wood"), S("Mangrove Bark"),
+	S("The trunk of a Mangrove tree."),
+	"mcl_mangrove_log_top.png", "mcl_mangrove_log.png", "mcl_mangrove:mangrove_stripped")
 
-minetest.register_node("mcl_mangrove:mangrove_tree", {
-	description = S("Mangrove Wood"),
-	_doc_items_longdesc = S("The trunk of a Mangrove tree."),
-	_doc_items_hidden = false,
-	tiles = {"mcl_mangrove_log_top.png", "mcl_mangrove_log_top.png", "mcl_mangrove_log.png"},
-	paramtype2 = "facedir",
-	on_place = mcl_util.rotate_axis,
-	after_destruct = mcl_core.update_leaves,
-	groups = {handy=1,axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
-	sounds = mcl_sounds.node_sound_wood_defaults(),
-	_mcl_blast_resistance = 2,
-	_mcl_hardness = 2,
-	_mcl_stripped_variant = "mcl_mangrove:mangrove_stripped_trunk",
-})
-minetest.register_node("mcl_mangrove:mangrove_tree_bark", {
-	description = S("Mangrove Bark"),
-	_doc_items_longdesc = S("The bark of a Mangrove tree."),
-	_doc_items_hidden = false,
-	tiles = {"mcl_mangrove_log.png", "mcl_mangrove_log.png", "mcl_mangrove_log.png"},
-	paramtype2 = "facedir",
-	groups = {handy=1,axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
-	sounds = mcl_sounds.node_sound_wood_defaults(),
-	on_place = mcl_util.rotate_axis,
-	_mcl_blast_resistance = 2,
-	_mcl_hardness = 2,
-	_mcl_stripped_variant = "mcl_mangrove:mangrove_stripped_bark",
-})
+mcl_core.register_wooden_planks("mangrove_wood", S("Mangrove Wood Planks"), {"mcl_mangrove_planks.png"})
 
-minetest.register_node("mcl_mangrove:mangrove_wood", {
-	description = S("Mangrove Wood Planks"),
-	_doc_items_longdesc = doc.sub.items.temp.build,
-	_doc_items_hidden = false,
-	tiles = {"mcl_mangrove_planks.png"},
+mcl_core.register_leaves("mangroveleaves", S("Mangrove Leaves"), S("Mangrove leaves are grown from mangrove trees."),
+	{"mcl_mangrove_leaves.png"}, "#48B518", "color", "mcl_core_palette_foliage.png", "mcl_mangrove:propagule", true, {20, 16, 12, 10}, 1)
 
-	is_ground_content = false,
-	groups = {handy=1,axey=1, flammable=3,wood=1,building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=20},
-	sounds = mcl_sounds.node_sound_wood_defaults(),
-	_mcl_blast_resistance = 3,
-	_mcl_hardness = 2,
-})
+mcl_core.register_stripped_trunk("mangrove_stripped", S("Stripped Mangrove Log"), S("Stripped Mangrove Wood"),
+	S("The stripped wood of a Mangrove tree"), S("The stripped bark of a Mangrove tree"),
+	"mcl_stripped_mangrove_log_top.png", "mcl_stripped_mangrove_log_side.png")
 
-local l_def = {
-	description = S("Mangrove Leaves"),
-	_doc_items_longdesc = S("mangrove leaves are grown from mangrove trees."),
-	_doc_items_hidden = false,
-	drawtype = "allfaces_optional",
-	waving = 2,
-	tiles = {"mcl_mangrove_leaves.png"},
-	color = "#48B518",
-	paramtype = "light",
-	paramtype2 = "color",
-	palette = "mcl_core_palette_foliage.png",
-	groups = {
-		handy = 1, hoey = 1, shearsy = 1, swordy = 1, dig_by_piston = 1,
-		flammable = 2, fire_encouragement = 30, fire_flammability = 60,
-		leaves = 1, deco_block = 1, compostability = 30, foliage_palette = 1
-	},
-	drop = get_drops(0),
-	_mcl_shears_drop = true,
-	sounds = mcl_sounds.node_sound_leaves_defaults(),
-	_mcl_blast_resistance = 0.2,
-	_mcl_hardness = 0.2,
-	_mcl_silk_touch_drop = true,
-	_mcl_fortune_drop = { get_drops(1), get_drops(2), get_drops(3), get_drops(4) },
-	on_construct = function(pos)
-		local node = minetest.get_node(pos)
-		if node.param2 == 0 or node.param2 == 1 then -- Check if param2 is 1 as well, since the schematics accidentally have the param2 of mangrove leaves be 1.
-			local new_node = mcl_core.get_foliage_block_type(pos)
-			if new_node.param2 ~= 0 then
-				minetest.swap_node(pos, new_node)
-			end
-		end
-	end,
-	after_place_node = function(pos)
-		mcl_core.make_player_leaves(pos) -- Leaves placed by the player should always be player leaves.
-	end,
-}
-
-minetest.register_node("mcl_mangrove:mangroveleaves", l_def)
-
-local o_def = table.copy(l_def)
-o_def._doc_items_create_entry = false
-o_def.groups.not_in_creative_inventory = 1
-o_def.groups.orphan_leaves = 1
-o_def._mcl_shears_drop = {"mcl_mangrove:mangroveleaves"}
-o_def._mcl_silk_touch_drop = {"mcl_mangrove:mangroveleaves"}
-
-minetest.register_node("mcl_mangrove:mangroveleaves_orphan", o_def)
-
-minetest.register_node("mcl_mangrove:mangrove_stripped_trunk", {
-	description = S("Stripped Mangrove Wood"),
-	_doc_items_longdesc = S("The stripped wood of a Mangrove tree"),
-	_doc_items_hidden = false,
-	tiles ={"mcl_stripped_mangrove_log_top.png","mcl_stripped_mangrove_log_side.png",},
-	paramtype2 = "facedir",
-	on_place = mcl_util.rotate_axis,
-	groups = {handy=1, axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
-	sounds = mcl_sounds.node_sound_wood_defaults(),
-	on_rotate = mcl_util.rotate_axis_and_place,
-	_mcl_blast_resistance = 2,
-	_mcl_hardness = 2,
-})
-minetest.register_node("mcl_mangrove:mangrove_stripped_bark", {
-	description = S("Stripped Mangrove Bark"),
-	_doc_items_longdesc = S("The stripped bark of a Mangrove tree"),
-	_doc_items_hidden = false,
-	tiles ={"mcl_stripped_mangrove_log_side.png","mcl_stripped_mangrove_log_side.png",},
-	paramtype2 = "facedir",
-	on_place = mcl_util.rotate_axis,
-	groups = {handy=1, axey=1, tree=1, flammable=2, building_block=1, material_wood=1, fire_encouragement=5, fire_flammability=5},
-	sounds = mcl_sounds.node_sound_wood_defaults(),
-	on_rotate = mcl_util.rotate_axis_and_place,
-	_mcl_blast_resistance = 2,
-	_mcl_hardness = 2,
-})
+minetest.register_alias("mcl_mangrove:mangrove_stripped_trunk", "mcl_mangrove:mangrove_stripped")
 
 minetest.register_node("mcl_mangrove:mangrove_roots", {
 	description = S("Mangrove Roots"),
@@ -234,45 +106,14 @@ minetest.register_node("mcl_mangrove:propagule", {
 		end
 	end)
 })
-
-minetest.register_node("mcl_mangrove:hanging_propagule_1", {
-	description = S("Hanging Propagule"),
-	_tt_help = S("Grows on Mangrove leaves"),
-	_doc_items_longdesc = "",
-	_doc_items_usagehelp = "",
-	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
-			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
-			destroy_by_lava_flow = 1, compostability = 30
-		},
-	paramtype = "light",
-	paramtype2 = "",
-	on_rotate = false,
-	walkable = false,
-	drop = "mcl_mangrove:propagule",
-	use_texture_alpha = "clip",
-	drawtype = 'mesh',
-	mesh = 'propagule_hanging_4.obj',
-	selection_box = {
-		type = "fixed",
-		fixed = {
-			{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
-		},
-	},
-	tiles = {"mcl_mangrove_propagule_hanging.png"},
-	inventory_image = "mcl_mangrove_propagule.png",
-	wield_image = "mcl_mangrove_propagule.png",
-})
-
------------------------------
---[[
+-----propagules---------
 minetest.register_node("mcl_mangrove:hanging_propagule_0", {
-	description = S("Hanging Propagule"),
+	description = S("Hanging Propagule 0"),
 	_tt_help = S("Grows on Mangrove leaves"),
 	_doc_items_longdesc = "",
 	_doc_items_usagehelp = "",
 	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			plant = 1, attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
 			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
 			destroy_by_lava_flow = 1, compostability = 30
 		},
@@ -280,7 +121,7 @@ minetest.register_node("mcl_mangrove:hanging_propagule_0", {
 	paramtype2 = "",
 	on_rotate = false,
 	walkable = false,
-	drop = "mcl_mangrove:propagule",
+	drop = "",
 	use_texture_alpha = "clip",
 	drawtype = 'mesh',
 	mesh = 'propagule_hanging_0.obj',
@@ -296,12 +137,12 @@ minetest.register_node("mcl_mangrove:hanging_propagule_0", {
 })
 
 minetest.register_node("mcl_mangrove:hanging_propagule_1", {
-	description = S("Hanging Propagule"),
+	description = S("Hanging Propagule 1"),
 	_tt_help = S("Grows on Mangrove leaves"),
 	_doc_items_longdesc = "",
 	_doc_items_usagehelp = "",
 	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
 			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
 			destroy_by_lava_flow = 1, compostability = 30
 		},
@@ -309,7 +150,7 @@ minetest.register_node("mcl_mangrove:hanging_propagule_1", {
 	paramtype2 = "",
 	on_rotate = false,
 	walkable = false,
-	drop = "mcl_mangrove:propagule",
+	drop = "",
 	use_texture_alpha = "clip",
 	drawtype = 'mesh',
 	mesh = 'propagule_hanging_1.obj',
@@ -325,12 +166,12 @@ minetest.register_node("mcl_mangrove:hanging_propagule_1", {
 })
 
 minetest.register_node("mcl_mangrove:hanging_propagule_2", {
-	description = S("Hanging Propagule"),
+	description = S("Hanging Propagule 2"),
 	_tt_help = S("Grows on Mangrove leaves"),
 	_doc_items_longdesc = "",
 	_doc_items_usagehelp = "",
 	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
 			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
 			destroy_by_lava_flow = 1, compostability = 30
 		},
@@ -338,7 +179,7 @@ minetest.register_node("mcl_mangrove:hanging_propagule_2", {
 	paramtype2 = "",
 	on_rotate = false,
 	walkable = false,
-	drop = "mcl_mangrove:propagule",
+	drop = "",
 	use_texture_alpha = "clip",
 	drawtype = 'mesh',
 	mesh = 'propagule_hanging_2.obj',
@@ -354,12 +195,12 @@ minetest.register_node("mcl_mangrove:hanging_propagule_2", {
 })
 
 minetest.register_node("mcl_mangrove:hanging_propagule_3", {
-	description = S("Hanging Propagule"),
+	description = S("Hanging Propagule 3"),
 	_tt_help = S("Grows on Mangrove leaves"),
 	_doc_items_longdesc = "",
 	_doc_items_usagehelp = "",
 	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
 			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
 			destroy_by_lava_flow = 1, compostability = 30
 		},
@@ -383,12 +224,12 @@ minetest.register_node("mcl_mangrove:hanging_propagule_3", {
 })
 
 minetest.register_node("mcl_mangrove:hanging_propagule_4", {
-	description = S("Hanging Propagule"),
+	description = S("Hanging Propagule 4"),
 	_tt_help = S("Grows on Mangrove leaves"),
 	_doc_items_longdesc = "",
 	_doc_items_usagehelp = "",
 	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
 			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
 			destroy_by_lava_flow = 1, compostability = 30
 		},
@@ -411,49 +252,85 @@ minetest.register_node("mcl_mangrove:hanging_propagule_4", {
 	wield_image = "mcl_mangrove_propagule.png",
 })
 
---]]
--------------------------------------
+---propagule_farm_thingy---
 
--- Register a new node below an existing node
-minetest.register_on_placenode(function(pos, new_node, player, itemstack, pointed_thing)
-    local node_name = new_node.name
+-- Table to store propagule nodes in the correct order
+local propagule_nodes = {
+    "mcl_mangrove:hanging_propagule_0",
+    "mcl_mangrove:hanging_propagule_1",
+    "mcl_mangrove:hanging_propagule_2",
+    "mcl_mangrove:hanging_propagule_3",
+    "mcl_mangrove:hanging_propagule_4",
+}
 
-    -- Add a node below if the placed node is "mcl_mangrove:mangroveleaves" and there is no node below it
-    if node_name == "mcl_mangrove:mangroveleaves" then
-        local node_below_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
-        local node_below = minetest.get_node(node_below_pos)
+local function spawn_propagule_below(pos, node_name)
+    local below_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
+    local below_node = minetest.get_node(below_pos)
 
-        if node_below.name == "air" then
-            add_node_below(pos, "mcl_mangrove:hanging_propagule_0")
-        end
+    if below_node.name == "air" then
+        minetest.set_node(below_pos, {name = node_name})
+        local meta = minetest.get_meta(below_pos)
+        meta:set_int("propagule_node", 1)
+        mcl_dye.add_bone_meal_particle(below_pos)
+        return true
     end
-end)
 
--- Use bone meal on "mcl_mangrove:mangroveleaves" node
+    return false
+end
+
+local function swap_propagule(pos, player)
+    local node = minetest.get_node(pos)
+    local name = node.name
+
+    if minetest.get_item_group(name, "propagule") == 1 then
+        local meta = minetest.get_meta(pos)
+        local current_node = meta:get_int("propagule_node")
+
+        -- Determine the next propagule node to swap to
+        local next_node = current_node + 1
+        if next_node > #propagule_nodes then
+            -- If it reaches the last propagule node, stop the cycle
+            return
+        end
+
+        local next_propagule = propagule_nodes[next_node]
+        minetest.swap_node(pos, {name = next_propagule})
+        meta:set_int("propagule_node", next_node)
+
+        mcl_dye.add_bone_meal_particle(pos)
+    end
+end
+
 minetest.override_item("mcl_bone_meal:bone_meal", {
-    on_use = function(itemstack, user, pointed_thing)
+    on_place = function(itemstack, player, pointed_thing)
         if pointed_thing.type == "node" then
             local pos = pointed_thing.under
             local node = minetest.get_node(pos)
-            local node_name = node.name
+            local name = node.name
 
-            if node_name == "mcl_mangrove:mangroveleaves" then
-                local node_below_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
-                local node_below = minetest.get_node(node_below_pos)
+            if name == "mcl_mangrove:mangroveleaves" then
+                -- Spawn the initial propagule below the mangrove leaves
+                local initial_propagule = propagule_nodes[1]
+                if spawn_propagule_below(pos, initial_propagule) then
+                    itemstack:take_item()
+                end
+            elseif minetest.get_item_group(name, "propagule") == 1 then
+                -- Swap to the next propagule
+                swap_propagule(pos, player)
 
-                if node_below.name == "mcl_mangrove:hanging_propagule_0" then
-                    swap_nodes(node_below_pos, true)
+                if not minetest.is_creative_enabled(player:get_player_name()) then
+                    itemstack:take_item()
                 end
             end
+            return itemstack
         end
-
-        return itemstack
     end,
 })
 
 
--------------------------------------------
 
+-------------------------------------
+-----------------------
 
 local propagule_rooted_nodes = {}
 for _,root in pairs(propagule_water_nodes) do
@@ -608,8 +485,8 @@ mcl_doors:register_door("mcl_mangrove:mangrove_door", {
 	groups = {handy=1,axey=1, material_wood=1, flammable=-1},
 	_mcl_hardness = 3,
 	_mcl_blast_resistance = 3,
-	tiles_bottom = {"mcl_mangrove_door_bottom.png", "mcl_doors_door_mangrove_side_lower.png"},
-	tiles_top = {"mcl_mangrove_door_top.png", "mcl_doors_door_mangrove_side_upper.png"},
+	tiles_bottom = "mcl_mangrove_door_bottom.png",
+	tiles_top = "mcl_mangrove_door_top.png",
 	sounds = mcl_sounds.node_sound_wood_defaults(),
 })
 
