@@ -107,13 +107,15 @@ minetest.register_node("mcl_mangrove:propagule", {
 	end)
 })
 
-minetest.register_node("mcl_mangrove:hanging_propagule_1", {
-	description = S("Hanging Propagule"),
+
+-----propagules---------
+minetest.register_node("mcl_mangrove:hanging_propagule_0", {
+	description = S("Hanging Propagule 0"),
 	_tt_help = S("Grows on Mangrove leaves"),
 	_doc_items_longdesc = "",
 	_doc_items_usagehelp = "",
 	groups = {
-			plant = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			plant = 1, attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
 			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
 			destroy_by_lava_flow = 1, compostability = 30
 		},
@@ -121,10 +123,10 @@ minetest.register_node("mcl_mangrove:hanging_propagule_1", {
 	paramtype2 = "",
 	on_rotate = false,
 	walkable = false,
-	drop = "mcl_mangrove:propagule",
+	drop = "",
 	use_texture_alpha = "clip",
 	drawtype = 'mesh',
-	mesh = 'propagule_hanging.obj',
+	mesh = 'propagule_hanging_0.obj',
 	selection_box = {
 		type = "fixed",
 		fixed = {
@@ -135,6 +137,202 @@ minetest.register_node("mcl_mangrove:hanging_propagule_1", {
 	inventory_image = "mcl_mangrove_propagule.png",
 	wield_image = "mcl_mangrove_propagule.png",
 })
+
+minetest.register_node("mcl_mangrove:hanging_propagule_1", {
+	description = S("Hanging Propagule 1"),
+	_tt_help = S("Grows on Mangrove leaves"),
+	_doc_items_longdesc = "",
+	_doc_items_usagehelp = "",
+	groups = {
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+	paramtype = "light",
+	paramtype2 = "",
+	on_rotate = false,
+	walkable = false,
+	drop = "",
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'propagule_hanging_1.obj',
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
+		},
+	},
+	tiles = {"mcl_mangrove_propagule_hanging.png"},
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+})
+
+minetest.register_node("mcl_mangrove:hanging_propagule_2", {
+	description = S("Hanging Propagule 2"),
+	_tt_help = S("Grows on Mangrove leaves"),
+	_doc_items_longdesc = "",
+	_doc_items_usagehelp = "",
+	groups = {
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+	paramtype = "light",
+	paramtype2 = "",
+	on_rotate = false,
+	walkable = false,
+	drop = "",
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'propagule_hanging_2.obj',
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
+		},
+	},
+	tiles = {"mcl_mangrove_propagule_hanging.png"},
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+})
+
+minetest.register_node("mcl_mangrove:hanging_propagule_3", {
+	description = S("Hanging Propagule 3"),
+	_tt_help = S("Grows on Mangrove leaves"),
+	_doc_items_longdesc = "",
+	_doc_items_usagehelp = "",
+	groups = {
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+	paramtype = "light",
+	paramtype2 = "",
+	on_rotate = false,
+	walkable = false,
+	drop = "mcl_mangrove:propagule",
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'propagule_hanging_3.obj',
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
+		},
+	},
+	tiles = {"mcl_mangrove_propagule_hanging.png"},
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+})
+
+minetest.register_node("mcl_mangrove:hanging_propagule_4", {
+	description = S("Hanging Propagule 4"),
+	_tt_help = S("Grows on Mangrove leaves"),
+	_doc_items_longdesc = "",
+	_doc_items_usagehelp = "",
+	groups = {
+			plant = 1,attached_node = 1, propagule = 1, not_in_creative_inventory=1, non_mycelium_plant = 1,
+			deco_block = 1, dig_immediate = 3, dig_by_water = 0, dig_by_piston = 1,
+			destroy_by_lava_flow = 1, compostability = 30
+		},
+	paramtype = "light",
+	paramtype2 = "",
+	on_rotate = false,
+	walkable = false,
+	drop = "mcl_mangrove:propagule",
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'propagule_hanging_4.obj',
+	selection_box = {
+		type = "fixed",
+		fixed = {
+			{-0.125, -0.5, -0.125, 0.125, 0.5, 0.125}, -- Base
+		},
+	},
+	tiles = {"mcl_mangrove_propagule_hanging.png"},
+	inventory_image = "mcl_mangrove_propagule.png",
+	wield_image = "mcl_mangrove_propagule.png",
+})
+
+---propagule_farm_thingy---
+
+-- Table to store propagule nodes in the correct order
+local propagule_nodes = {
+    "mcl_mangrove:hanging_propagule_0",
+    "mcl_mangrove:hanging_propagule_1",
+    "mcl_mangrove:hanging_propagule_2",
+    "mcl_mangrove:hanging_propagule_3",
+    "mcl_mangrove:hanging_propagule_4",
+}
+
+local function spawn_propagule_below(pos, node_name)
+    local below_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
+    local below_node = minetest.get_node(below_pos)
+
+    if below_node.name == "air" then
+        minetest.set_node(below_pos, {name = node_name})
+        local meta = minetest.get_meta(below_pos)
+        meta:set_int("propagule_node", 1)
+        mcl_dye.add_bone_meal_particle(below_pos)
+        return true
+    end
+
+    return false
+end
+
+local function swap_propagule(pos, player)
+    local node = minetest.get_node(pos)
+    local name = node.name
+
+    if minetest.get_item_group(name, "propagule") == 1 then
+        local meta = minetest.get_meta(pos)
+        local current_node = meta:get_int("propagule_node")
+
+        -- Determine the next propagule node to swap to
+        local next_node = current_node + 1
+        if next_node > #propagule_nodes then
+            -- If it reaches the last propagule node, stop the cycle
+            return
+        end
+
+        local next_propagule = propagule_nodes[next_node]
+        minetest.swap_node(pos, {name = next_propagule})
+        meta:set_int("propagule_node", next_node)
+
+        mcl_dye.add_bone_meal_particle(pos)
+    end
+end
+
+minetest.override_item("mcl_bone_meal:bone_meal", {
+    on_place = function(itemstack, player, pointed_thing)
+        if pointed_thing.type == "node" then
+            local pos = pointed_thing.under
+            local node = minetest.get_node(pos)
+            local name = node.name
+
+            if name == "mcl_mangrove:mangroveleaves" then
+                -- Spawn the initial propagule below the mangrove leaves
+                local initial_propagule = propagule_nodes[1]
+                if spawn_propagule_below(pos, initial_propagule) then
+                    itemstack:take_item()
+                end
+            elseif minetest.get_item_group(name, "propagule") == 1 then
+                -- Swap to the next propagule
+                swap_propagule(pos, player)
+
+                if not minetest.is_creative_enabled(player:get_player_name()) then
+                    itemstack:take_item()
+                end
+            end
+            return itemstack
+        end
+    end,
+})
+
+
+
+-------------------------------------
+
 local propagule_rooted_nodes = {}
 for _,root in pairs(propagule_water_nodes) do
 	local r = root:split(":")[2]
