@@ -269,11 +269,11 @@ tiles = {"mcl_sculk_sensor.png",
 	mesh = 'mcl_sculk_sensor.obj',
 	selection_box = {
 			type = 'fixed',
-			fixed = {-.5, -.5, -.5, .5, -.05, .5},
+			fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000},
 		},
    	collision_box = {
   	  type = "fixed",
-   	 fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+   	 fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000},
    	},
 	groups = {handy = 1, hoey = 1, building_block=1, sculk = 1,},
 	place_param2 = 1,
@@ -311,7 +311,7 @@ tiles = {"mcl_sculk_sensor.png",
                 })
                 
                 -- Play sound effect
-                --minetest.sound_play("modname_sculk_sound", {pos = pos, gain = 1.0})
+                --minetest.sound_play("sculk_sound", {pos = pos, gain = 1.0})
                 
                 -- Emit mesecon signal
                 mesecon.receptor_on(pos, sculk_sensor_effector_rules)
