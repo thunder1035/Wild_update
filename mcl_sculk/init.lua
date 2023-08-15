@@ -185,7 +185,15 @@ minetest.register_node("mcl_sculk:vein", {
 	description = S("Sculk Vein"),
 	_doc_items_longdesc = S("Sculk vein."),
 	drawtype = "signlike",
-	tiles = {"mcl_sculk_vein.png"},
+	tiles = {
+		{ name = "mcl_sculk_vein.png",
+		animation = {
+			type = "vertical_frames",
+			aspect_w = 16,
+			aspect_h = 16,
+			length = 3.0,
+		}, },
+	},
 	inventory_image = "mcl_sculk_vein.png",
 	wield_image = "mcl_sculk_vein.png",
 	paramtype = "light",
@@ -246,10 +254,9 @@ local function should_entity_trigger_sculk_sensor(entity)
     local node_pos = vector.round(entity_pos)
     return not is_node_type_allowed(node_pos)
 end
-
--------------------------------------
--- Register mesecon output on sculk sensor
-minetest.register_node("mcl_sculk:sculk_sensor", {
+----------------
+-- off sculk sensor
+minetest.register_node("mcl_sculk:sculk_sensor_inactive", {
 description = "Sculk Sensor",
 tiles = {"mcl_sculk_sensor.png",
 },
@@ -267,13 +274,153 @@ tiles = {"mcl_sculk_sensor.png",
 	use_texture_alpha = "clip",
 	drawtype = 'mesh',
 	mesh = 'mcl_sculk_sensor.obj',
-	selection_box = {
+	collision_box = {
 			type = 'fixed',
-			fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000},
+			fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000}
 		},
-   	collision_box = {
+   	selection_box = {
   	  type = "fixed",
-   	 fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000},
+   	 fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+   	},
+	groups = {handy = 1, hoey = 1, building_block=1, sculk = 1,},
+	place_param2 = 1,
+	is_ground_content = false,
+	on_destruct = sculk_on_destruct,
+	_mcl_blast_resistance = 1.5,
+	_mcl_hardness = 1.5,
+	_mcl_silk_touch_drop = true,
+    --sounds = default.node_sound_stone_defaults(),
+    	mesecons = {receptor = {
+			state = mesecon.state.off,
+		}},
+})
+
+--on sculk sensor
+minetest.register_node("mcl_sculk:sculk_sensor_active", {
+description = "Sculk Sensor active",
+tiles = {"mcl_sculk_sensor.png",
+},
+	overlay_tiles = {{
+	name = "mcl_sculk_sensor_tendril_active.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 32,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+},
+	drop = "mcl_sculk:sculk_sensor_inactive",
+	sounds = sounds,
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_sensor.obj',
+	collision_box = {
+			type = 'fixed',
+			fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000}
+		},
+   	selection_box = {
+  	  type = "fixed",
+   	 fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+   	},
+	groups = {handy = 1, hoey = 1, building_block=1, sculk = 1,},
+	place_param2 = 1,
+	is_ground_content = false,
+	on_destruct = sculk_on_destruct,
+	light_source  = 3,
+	_mcl_blast_resistance = 1.5,
+	_mcl_hardness = 1.5,
+    --sounds = default.node_sound_stone_defaults(),
+    	mesecons = {receptor = {
+			state = mesecon.state.on,
+		}},
+	
+})
+
+--back to on to off--
+--FIXME make the redstone receptor off, cannot do that right now
+
+local function swapNodes(pos)
+    local node = minetest.get_node(pos)
+    if node.name == "mcl_sculk:sculk_sensor_active" then
+        minetest.swap_node(pos, {name = "mcl_sculk:sculk_sensor_inactive"})
+    end
+end
+
+minetest.register_abm({
+    nodenames = {"mcl_sculk:sculk_sensor_inactive", "mcl_sculk:sculk_sensor_active"}, -- Replace with the actual node names
+    interval = 3.0, -- Swap every 3 seconds
+    chance = 1,
+    action = function(pos)
+        swapNodes(pos)
+    end,
+})
+
+------------------
+--[[----Better_sensor(WIP)-------------------------------
+--TODO Register better mesecon output on sculk sensor
+minetest.register_node("mcl_sculk:sculk_sensor_inactive", {
+	description = "Sculk Sensor",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_sensor.obj',
+--new_mesh_with_multi_material_feature--arrange the texture list wise
+--base_texture(texture of no use, is add as mesh was dealing with some error)
+--sculk tendril(mcl_sculk_sensor_tendril)
+--sculk box_vertical_top(mcl_sculk_sensor_top)
+--sculk box_vertical_bottom(mcl_sculk_sensor_bottom)
+--sculk box_horizontal(mcl_sculk_sensor_side)
+	tiles = {
+	{
+	name = "mcl_sculk_sensor_base.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_tendril_inactive.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_top.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_bottom.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_side.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}}
+		},
+	use_texture_alpha = "clip",		
+	drop = "",
+	sounds = sounds,
+
+	collision_box = {
+			type = 'fixed',
+			fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000}
+		},
+   	selection_box = {
+  	  type = "fixed",
+   	 fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
    	},
 	groups = {handy = 1, hoey = 1, building_block=1, sculk = 1,},
 	place_param2 = 1,
@@ -311,7 +458,7 @@ tiles = {"mcl_sculk_sensor.png",
                 })
                 
                 -- Play sound effect
-                --minetest.sound_play("sculk_sound", {pos = pos, gain = 1.0})
+                --minetest.sound_play("modname_sculk_sound", {pos = pos, gain = 1.0})
                 
                 -- Emit mesecon signal
                 mesecon.receptor_on(pos, sculk_sensor_effector_rules)
@@ -325,6 +472,171 @@ tiles = {"mcl_sculk_sensor.png",
     },
 })
 
+--[[ ----------------water_logged
+minetest.register_node("mcl_sculk:sculk_sensor_inactive_water_logged", {
+	description = "Sculk Sensor",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_sensor_water_logged.obj',
+--new_mesh_texture--arrange the texture list wise
+--base_texture(texture of no use, is add as model was dealing with some error)
+--sculk tendril(mcl_sculk_sensor_tendril)
+--sculk box_vertical_top(mcl_sculk_sensor_top)
+--sculk box_vertical_bottom(mcl_sculk_sensor_bottom)
+--sculk box_horizontal(mcl_sculk_sensor_side)
+	tiles = {
+	{
+	name = "mcl_sculk_sensor_tendril_inactive.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_top.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_bottom.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_side.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "water".png", ---water texture here
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}}
+		},
+	use_texture_alpha = "clip",		
+	drop = "",
+	sounds = sounds,
+
+	collision_box = {
+			type = 'fixed',
+			fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000}
+		},
+   	selection_box = {
+  	  type = "fixed",
+   	 fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+   	},
+	groups = {handy = 1, hoey = 1, building_block=1, sculk = 1,},
+	place_param2 = 1,
+	is_ground_content = false,
+	on_destruct = sculk_on_destruct,
+	_mcl_blast_resistance = 3,
+	light_source  = 6,
+	_mcl_hardness = 3,
+	_mcl_silk_touch_drop = true,
+})
+	
+--]]
+--]]
+-----------------
+minetest.register_node("mcl_sculk:shrieker", {
+	description = S("Sculk shrieker"),
+	tiles = {
+	{
+	name = "mcl_sculk_shrieker_top.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_shrieker_top.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_shrieker_side.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_shrieker_inner_top.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_shrieker_bottom.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}}
+	},
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_shrieker.obj',
+	collision_box = {
+		type = 'fixed',
+		fixed = {-0.5000, -0.5000, -0.5000, 0.5000, 0.000, 0.5000}
+	},
+   	selection_box = {
+  	 	type = "fixed",
+   		fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+   	},
+	drop = "",
+	sounds = sounds,
+	groups = {handy = 1, hoey = 1, building_block=1, sculk = 1,},
+	place_param2 = 1,
+	is_ground_content = false,
+	on_destruct = sculk_on_destruct,
+	_mcl_blast_resistance = 3,
+	_mcl_hardness = 3,
+	_mcl_silk_touch_drop = true,
+})
+
+--Add this in mcl_deepslate----------------------
+--if minetest.get_modpath("mcl_deepslate") then
+
+--minetest.register_node("mcl_deepslate:reinforced_deepslate", {
+--	description = S("Reinforced Deepslate"),
+--	tiles = {
+--		"mcl_deepslate_reinforced_deepslate_top.png",
+--		"mcl_deepslate_reinforced_deepslate_bottom.png",
+--		"mcl_deepslate_reinforced_deepslate_side.png"
+--	},
+--	drop = "",
+--	sounds = mcl_sounds.node_sound_stone_defaults(),
+--	groups = {creative_breakable=1, building_block=1, material_stone=1},
+--	sounds = mcl_sounds.node_sound_stone_defaults(),
+--	is_ground_content = false,
+--	on_blast = function() end,
+--	drop = "",
+--	_mcl_blast_resistance = 3600000,
+--	_mcl_hardness = -1,
+--})
+--end
 
 --------------------------------------------------------------------
 --local modpath = minetest.get_modpath("mcl_sculk")
