@@ -1,1 +1,1 @@
-Theis folder contains the "in development" files
+This folder contains the "in development" files
