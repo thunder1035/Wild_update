@@ -36,7 +36,7 @@ local tadpole = {
 	spawn_in_group_min = 2,
 	spawn_in_group = 4, 
 	tilt_swim = true,
-	collisionbox = {-0.5000, -0.5000, -0.5000, -0.2500, -0.3125, -0.06250},
+	collisionbox = {-0.2, -0.01, -0.2, 0.2, 0.69, 0.2},
 	visual = "mesh",
 	mesh = "mobs_mc_tadpole.b3d",
 	textures = {
@@ -45,15 +45,19 @@ local tadpole = {
 	sounds = {
 		damage = "mobs_mc_tadpole_hurt",
 		death = "mobs_mc_tadpole_death",
+		eat = "mobs_mc_animal_eat_generic",
 		distance = 16,
 	},
 	animation = {
-		stand_start = 0,
-		stand_end = 1,
-		walk_start = 2,
+		stand_start = 10,
+		stand_end = 30,
+		walk_start = 10,
 		walk_end = 30,
-		run_start = 1,
+		run_start = 10,
 		run_end = 30,
+	},
+	follow = {
+		"mcl_mobitems:slimeball",
 	},
 	drops = {},
 	visual_size = {x=30, y=30},
@@ -82,7 +86,7 @@ local tadpole = {
 				y = lp.y - s.y,
 				z = lp.z - s.z
 			}
-			if object and not object:is_player() and object:get_luaentity() and object:get_luaentity().name == "mobs_mc:cod" then
+			if object and not object:is_player() and object:get_luaentity() and object:get_luaentity().name == "mobs_mc:tadpole" then
 				self.state = "runaway"
 				self.object:set_rotation({x=0,y=(atan(vec.z / vec.x) + 3 * pi / 2) - self.rotate,z=0})
 			end
@@ -95,9 +99,13 @@ local tadpole = {
 			clicker:set_wielded_item("mcl_buckets:bucket_tadpole")
 			awards.unlock(clicker:get_player_name(), "mcl:bukkit_bukkit")
 		end
+		
+		if self:feed_tame(clicker, 1, false, true) then return end
+		if mcl_mobs:protect(self, clicker) then return end
+		if mcl_mobs:capture_mob(self, clicker, 0, 60, 5, false, nil) then return end
 	end
 }
 
 mcl_mobs.register_mob("mobs_mc:tadpole", tadpole)
 
-mcl_mobs.register_egg("mobs_mc:tadpole", S("Tadpole"), "#4c3e30", "#1b0200", 0)
+mcl_mobs.register_egg("mobs_mc:tadpole", S("Tadpole"), "#4c3e30", "#51331d", 0)
