@@ -86,7 +86,7 @@ local tadpole = {
 				y = lp.y - s.y,
 				z = lp.z - s.z
 			}
-			if object and not object:is_player() and object:get_luaentity() and object:get_luaentity().name == "mobs_mc:tadpole" then
+			if object and not object:is_player() and object:get_luaentity() and object:get_luaentity().name == "mobs_mc:axolotl" then
 				self.state = "runaway"
 				self.object:set_rotation({x=0,y=(atan(vec.z / vec.x) + 3 * pi / 2) - self.rotate,z=0})
 			end
@@ -100,7 +100,7 @@ local tadpole = {
 			awards.unlock(clicker:get_player_name(), "mcl:bukkit_bukkit")
 		end
 		
-		if self:feed_tame(clicker, 1, false, true) then return end
+		if self:feed_tame(clicker, 4, false, true) then return end
 		if mcl_mobs:protect(self, clicker) then return end
 		if mcl_mobs:capture_mob(self, clicker, 0, 60, 5, false, nil) then return end
 	end
