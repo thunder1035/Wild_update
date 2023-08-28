@@ -28,4 +28,12 @@ D)super hard
 1)anicient city and deepdark
 2)allay
 3)boat with chest(fully working with fucntion)
-4)Adavcements/achivements
+4)Adavcements/achivements-
+
+[It spreads](Kill a mob next to a catalyst)
+
+[Birthday song](Have an Allay drop a cake at a noteblock)-Tame an allay by giving it a cake while having dropped cake items and play a noteblock nearby.
+
+[With our powers combined!](Have all 3 froglights in your inventory)-Acquire at least one of each pearlescent, verdant, and ochre froglights in your inventory at the same time.
+
+[Sneak 100](Sneaking next to a Sculk Sensor without triggering it)-Sneak next to a Sculk Sensor or Warden without triggering or aggravating it.
