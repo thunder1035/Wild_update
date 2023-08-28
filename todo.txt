@@ -36,4 +36,10 @@ D)super hard
 
 [With our powers combined!](Have all 3 froglights in your inventory)-Acquire at least one of each pearlescent, verdant, and ochre froglights in your inventory at the same time.
 
+[Bukkit Bukkit](Catch a tadpole in a bucket)
+
 [Sneak 100](Sneaking next to a Sculk Sensor without triggering it)-Sneak next to a Sculk Sensor or Warden without triggering or aggravating it.
+
+[You've Got a Friend in Me](Have an Allay deliver items to you)
+
+[When the Squad Hops into Town](Get each frog variant on a lead)
