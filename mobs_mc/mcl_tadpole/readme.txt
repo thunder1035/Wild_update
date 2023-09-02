@@ -3,14 +3,14 @@ By Thunder1035
 
 -------
 Animation Frames-
-(0 to 1){Still}
-(2 to 30){movement}
+(0 to 10){Still}
+(10 to 30){movement}
 
 
 --FIXME todo-----------------------
 
 --In [mobs_mc/init.lua] add
---dofile(path .. "/tadpole.lua") -- Thunde1035
+--dofile(path .. "/tadpole.lua") -- Thunder1035
 
 --make tadpole grow into frog
 
