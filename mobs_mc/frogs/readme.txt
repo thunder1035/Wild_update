@@ -18,6 +18,8 @@ Animation Frames-WIP
 
 --make tadpole grow into frog
 
+--add  frog model 
+
 --make frog lay tadpole eggs
 
 --In [mcl_achievements/init.lua] add [When the Squad Hops into Town] in awards)
