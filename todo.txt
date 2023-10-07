@@ -22,7 +22,7 @@ bucket of tadpole, Disc fragments, Echo shards, Music Disc 5
 1) recovery compass
 2)sculk blocks functions(real_work(main))
 3)swift sneak enchantment book
-4)warden,spawning time,darkness
+4)warden,warden spawning,darkness
 --------------------------------
 D)super hard
 1)anicient city and deepdark
