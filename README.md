@@ -23,7 +23,7 @@ https://minecraft.fandom.com/wiki/Java_Edition_1.19
 1.4.6
 
 ## License
-(code)AGPL-3.0
+(code)AGPL-3.0 , --- Soon to be converted into GPL-3.0-only
 
 (media)CC-by-sa-3.0
 
