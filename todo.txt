@@ -16,11 +16,11 @@ TODO-
 2)froglight
 3)items-
 bucket of tadpole, Disc fragments, Echo shards, Music Disc 5
-4)goat horns (8 types of sound)
+4)goat horns (8 types of sounds)
 --------------------------------
 4)very hard
-1) recovery compass
-2)sculk blocks functions(real_work(main))
+1)recovery compass
+2)sculk blocks functions(main)
 3)swift sneak enchantment book
 4)warden,warden spawning,darkness
 --------------------------------
