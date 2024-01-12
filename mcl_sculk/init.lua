@@ -218,42 +218,6 @@ minetest.register_node("mcl_sculk:vein", {
 	on_rotate = false,
 })
 
-local wool = { "mcl_wool:white", "mcl_wool:grey",  "mcl_wool:dark_grey", "mcl_wool:silver", "mcl_wool:black", "mcl_wool:red", "mcl_wool:yellow", "mcl_wool:dark_green", "mcl_wool:cyan", "mcl_wool:blue", "mcl_wool:magenta", "mcl_wool:orange", "mcl_wool:violet", "mcl_wool:brown", "mcl_wool:pink", "mcl_wool:lime", "mcl_wool:light_blue",}
-
--- List of nodes that entities can move on without triggering the sculk sensor
-local allowed_node_types = {"group:carpet", wool}
-
--- ID of the entity to ignore (set to -1 to detect all entities)
-local ignored_entity_id = 123
-
--- Function to check if an entity should be ignored
-local function is_entity_ignored(entity)
-    if ignored_entity_id == -1 then
-        return false
-    end
-    return entity:get_id() == ignored_entity_id
-end
-
--- Function to check if a node type is allowed
-local function is_node_type_allowed(node_pos)
-    local node_name = minetest.get_node(node_pos).name
-    for _, allowed_node_type in ipairs(allowed_node_types) do
-        if minetest.get_item_group(node_name, allowed_node_type) ~= 0 then
-            return true
-        end
-    end
-    return false
-end
-
--- Function to check if an entity should trigger the sculk sensor
-local function should_entity_trigger_sculk_sensor(entity)
-    if is_entity_ignored(entity) then
-        return false
-    end
-    local entity_pos = entity:get_pos()
-    local node_pos = vector.round(entity_pos)
-    return not is_node_type_allowed(node_pos)
-end
 ----------------
 -- off sculk sensor
 minetest.register_node("mcl_sculk:sculk_sensor_inactive", {
@@ -337,24 +301,30 @@ tiles = {"mcl_sculk_sensor.png",
 })
 
 --back to on to off--
---FIXME make the redstone receptor off, cannot do that right now
-
-local function swapNodes(pos)
-    local node = minetest.get_node(pos)
-    if node.name == "mcl_sculk:sculk_sensor_active" then
-        minetest.swap_node(pos, {name = "mcl_sculk:sculk_sensor_inactive"})
-    end
-end
-
+-- Revert replacement nodes back to emitter nodes
 minetest.register_abm({
-    nodenames = {"mcl_sculk:sculk_sensor_inactive", "mcl_sculk:sculk_sensor_active"}, -- Replace with the actual node names
-    interval = 3.0, -- Swap every 3 seconds
-    chance = 1,
-    action = function(pos)
-        swapNodes(pos)
-    end,
-})
+  label = "Active Sculk Check",
+  nodenames = {"mcl_sculk:sculk_sensor_active"},
+  interval = 2.5,
+  chance = 1,
+  action = function(pos)
+    local node = minetest.get_node(pos)
+    if node.name == "mcl_sculk:sculk_sensor_active" then
+      local meta = minetest.get_meta(pos)
+      local creation_time = meta:get_int("creation_time") or 0
+      local current_time = minetest.get_gametime()
 
+      -- Check if the node has existed for at least 5 seconds (100 ticks per second)
+      local existence_time = current_time - creation_time
+      local existence_seconds = existence_time / 100
+      if existence_seconds >= 5 then
+        -- Revert to particle emitter node after turning off mesecon signal
+        stop_mesecon_signal(pos)
+        minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_inactive"})
+      end
+    end
+  end,
+})
 ------------------
 --[[----Better_sensor(WIP)-------------------------------
 --TODO Register better mesecon output on sculk sensor
