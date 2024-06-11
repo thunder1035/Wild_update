@@ -6,6 +6,12 @@
 --4)sculk shrieker--
 --5)sculk vein--
 
+local modpath = minetest.get_modpath("mcl_sculk")
+
+-- Load files
+dofile(modpath .. "/sculk_sensor.lua")
+dofile(modpath .. "/sculk_shrieker.lua")
+
 --------------------------------------------------------------------
 
 local S = minetest.get_translator(minetest.get_current_modname())
@@ -338,8 +344,3 @@ mesecon.register_mvps_stopper("mcl_sculk:sculk_sensor_active_w_logged")
 --mesecon.register_mvps_stopper("mcl_deepslate:reinforced_deepslate")
 
 --------------------------------------------------------------------
-local modpath = minetest.get_modpath("mcl_sculk")
-
--- Load files
-dofile(modpath .. "/sculk_sensor.lua")
-dofile(modpath .. "/sculk_shrieker.lua")
