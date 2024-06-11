@@ -53,8 +53,8 @@ local wool = {
     "mcl_wool:silver_carpet",
     "mcl_wool:yellow_carpet",
     "mcl_wool:white_carpet",
-    "mcl_sculk:sculk_sensor_active",
-    "mcl_sculk:sculk_sensor_active_w_logged",
+    --"mcl_sculk:sculk_sensor_active",
+    --"mcl_sculk:sculk_sensor_active_w_logged",
 }
 
 -- Function to check if a node is in the wool list
@@ -257,7 +257,6 @@ local ignored_entities = {
     "mcl_sculk:vibration",
 
     --"mobs_mc:warden",
-    
 }
 
 -- Function to check if an element exists in a table
@@ -280,12 +279,19 @@ local function detect_player_and_entities(pos)
         local ctrl = player:get_player_control()
 
         -- Check if the player is within a range of 8 and not sneaking, is moving, jumping, and not flying
-        if distance <= 8 and not ctrl.sneak and (ctrl.up or ctrl.down or ctrl.left or ctrl.right or ctrl.jump) and not ctrl.fly then
-            local player_name = player:get_player_name()
-            -- Check if the player is not in the ignored_entities list
-            if not contains(ignored_entities, player_name) then
-                -- Spawn particle entity at player position moving towards emitter node
+        if distance <= 8 and not ctrl.sneak and (ctrl.up or ctrl.down or ctrl.left or ctrl.right or ctrl.jump) then
+            local node_pos_below = vector.round({x = player_pos.x, y = player_pos.y - 1, z = player_pos.z})
+            local node_below = minetest.get_node(node_pos_below)
+
+            if minetest.registered_nodes[node_below.name] and minetest.registered_nodes[node_below.name].walkable then
+                -- Player is in motion, not sneaking, and touching a walkable node, trigger the desired actions
                 spawn_particle(player_pos, pos)
+                local player_name = player:get_player_name()
+                -- Check if the player is not in the ignored_entities list
+                if not contains(ignored_entities, player_name) then
+                    -- Spawn particle entity at player position moving towards emitter node
+                    spawn_particle(player_pos, pos)
+                end
             end
         end
     end
@@ -515,6 +521,7 @@ minetest.register_craftitem("mcl_sculk:vibration", {
     end,
 })
 -------------------------------------------------
+-------------------------------------------------
 minetest.register_node("mcl_sculk:sculk_sensor", {
 description = "Sculk Sensor",
 	tiles = {
@@ -590,112 +597,11 @@ description = "Sculk Sensor",
 	_mcl_hardness = 1.5,
 	_mcl_silk_touch_drop = true and {"mcl_sculk:sculk_sensor",},
     	on_construct = function(pos)
-	minetest.after(0.5, function()
+	minetest.after(0.1, function()
     		if minetest.get_node(pos).name == "mcl_sculk:sculk_sensor" then
       	minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_inactive"})
     		end
   	end)
-    	end,
-})
-
-minetest.register_node("mcl_sculk:sculk_sensor_active", {
-description = "Sculk Sensor Active",
-	tiles = {
-	{
-	name = "mcl_sculk_sensor_tendril_active.png",
-	animation = {
-		type = "vertical_frames",
-		aspect_w = 16,
-		aspect_h = 16,
-		length = 1.0,
-	}},
-	{
-	name = "mcl_sculk_sensor_tendril_active.png",
-	animation = {
-		type = "vertical_frames",
-		aspect_w = 16,
-		aspect_h = 16,
-		length = 1.0,
-	}},
-	{
-	name = "mcl_sculk_sensor_top.png",
-	animation = {
-		type = "vertical_frames",
-		aspect_w = 16,
-		aspect_h = 16,
-		length = 2.0,
-	}},
-	{
-	name = "mcl_sculk_sensor_side.png",
-	animation = {
-		type = "vertical_frames",
-		aspect_w = 16,
-		aspect_h = 16,
-		length = 2.0,
-	}},
-	{
-	name = "mcl_sculk_sensor_bottom.png",
-	animation = {
-		type = "vertical_frames",
-		aspect_w = 16,
-		aspect_h = 16,
-		length = 2.0,
-	}},
-	{
-	name = "mcl_transparent_water.png", ---water texture here
-	animation = {
-		type = "vertical_frames",
-		aspect_w = 16,
-		aspect_h = 16,
-		length = 3.0,
-	},
-	backface_culling = false,
-	}
-		},
-	use_texture_alpha = "blend",
-	drop = "",
-	sounds = sounds,
-	use_texture_alpha = "clip",
-	drawtype = 'mesh',
-	mesh = 'mcl_sculk_sensor.obj',
-	collision_box = {
-			type = 'fixed',
-			fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
-		},
-   	selection_box = {
-			type = "fixed",
-   	 		fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5},
-   	},
-	groups = {handy = 1, hoey = 1, building_block=1, liquid=3, sculk = 1, not_in_creative_inventory=1,  xp=5},
-	place_param2 = 1,
-	is_ground_content = false,
-	_mcl_silk_touch_drop = true and {"mcl_sculk:sculk_sensor"},
-	light_source  = 3,
-	_mcl_blast_resistance = 1.5,
-	_mcl_hardness = 1.5,
-    	on_construct = function(pos)
-        	-- Emit mesecon signal when the active sculk sensor node is created
-        	mesecon.receptor_on(pos, mesecon.rules.alldirs)
-        	emit_mesecon_signal(pos)
-        	minetest.sound_play("mcl_sculk_sensor_active", {
-        	pos = pos,
-        	gain = 0.5,
-        	max_hear_distance = 16
-    		})
-  	minetest.after(3, function()
-  		minetest.sound_play("mcl_sculk_sensor_inactive", {
-        	pos = pos,
-        	gain = 0.2,
-        	max_hear_distance = 16
-    		})
-    		if minetest.get_node(pos).name == "mcl_sculk:sculk_sensor_active" then
-      		minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor"})
-      		stop_mesecon_signal(pos)
-    			end
-  		end)
-    	end,
-	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        	handle_bucket_rightclick(pos, node.name, clicker)
     	end,
 })
 
@@ -779,7 +685,7 @@ description = "Sculk Sensor Inactive",
        	 	return true
     	end,
     	on_construct = function(pos)
-    	 	minetest.after(1, function()
+    	 	minetest.after(0.1, function()
     	 	minetest.get_node_timer(pos):start(0.1)
   		end)
   	end,
@@ -788,38 +694,8 @@ description = "Sculk Sensor Inactive",
     	end,
 })
 
-
-minetest.register_abm({
-    label = "sculk_sensor_active to sculk_sensor_inactive",
-    nodenames = {"group:sculk", },
-    interval = 2.5,
-    chance = 1,
-    action = function(pos)
-        local node = minetest.get_node(pos)
-        if node.name == "mcl_sculk:sculk_sensor"or
-           node.name == "mcl_sculk:sculk_sensor_active" then
-            local meta = minetest.get_meta(pos)
-            local creation_time = meta:get_int("creation_time") or 0
-            local current_time = minetest.get_gametime()
-
-            -- Check if the node has existed for at least 5 seconds (100 ticks per second)
-            local existence_time = current_time - creation_time
-            local existence_seconds = existence_time / 100
-            if existence_seconds >= 5 then
-                -- Revert to inactive sculk sensor node after turning off mesecon signal
-                stop_mesecon_signal(pos)
-                minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_inactive"})
-            end
-        end
-    end,
-})
-
-----------------water_logged
-
-minetest.register_node("mcl_sculk:sculk_sensor_active_w_logged", {
-	description = "Sculk Sensor Active Water Logged",
-	drawtype = 'mesh',
-	mesh = 'mcl_sculk_sensor.obj',
+minetest.register_node("mcl_sculk:sculk_sensor_active", {
+description = "Sculk Sensor Active",
 	tiles = {
 	{
 	name = "mcl_sculk_sensor_tendril_active.png",
@@ -857,7 +733,111 @@ minetest.register_node("mcl_sculk:sculk_sensor_active_w_logged", {
 	name = "mcl_sculk_sensor_bottom.png",
 	animation = {
 		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_transparent_water.png", ---water texture here
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 3.0,
+	},
+	backface_culling = false,
+	}
+		},
+	use_texture_alpha = "blend",
+	drop = "",
+	sounds = sounds,
+	use_texture_alpha = "clip",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_sensor.obj',
+	collision_box = {
+			type = 'fixed',
+			fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
+		},
+   	selection_box = {
+			type = "fixed",
+   	 		fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+   	},
+	groups = {handy = 1, hoey = 1, building_block=1, liquid=3, sculk = 1, not_in_creative_inventory=1,  xp=5},
+	place_param2 = 1,
+	is_ground_content = false,
+	_mcl_silk_touch_drop = true and {"mcl_sculk:sculk_sensor"},
+	light_source  = 4,
+	_mcl_blast_resistance = 1.5,
+	_mcl_hardness = 1.5,
+    	on_construct = function(pos)
+        	-- Emit mesecon signal when the active sculk sensor node is created
+        	mesecon.receptor_on(pos, mesecon.rules.alldirs)
+        	emit_mesecon_signal(pos)
+        	minetest.sound_play("mcl_sculk_sensor_active", {
+        	pos = pos,
+        	gain = 0.5,
+        	max_hear_distance = 16
+    		})
+  	minetest.after(1.5, function()
+    		if minetest.get_node(pos).name == "mcl_sculk:sculk_sensor_active" then
+      		minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor"})
+      		stop_mesecon_signal(pos)
+    			end
+  		minetest.sound_play("mcl_sculk_sensor_inactive", {
+        	pos = pos,
+        	gain = 0.2,
+        	max_hear_distance = 16
+    		})
+  		end)
+    	end,
+	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+        	handle_bucket_rightclick(pos, node.name, clicker)
+    	end,
+})
 
+----------------water_logged
+
+minetest.register_node("mcl_sculk:sculk_sensor_w_logged", {
+	description = "Sculk Sensor Inactive Water Logged",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_sensor.obj',
+	tiles = {
+	{
+	name = "mcl_sculk_sensor_tendril_inactive.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_tendril_inactive.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_top.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_side.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_bottom.png",
+	animation = {
+		type = "vertical_frames",
 		aspect_w = 16,
 		aspect_h = 16,
 		length = 2.0,
@@ -884,23 +864,25 @@ minetest.register_node("mcl_sculk:sculk_sensor_active_w_logged", {
 			type = "fixed",
    	 		fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
    	},
-	groups = {handy = 1, hoey = 1, liquid=3, puts_out_fire=1, building_block=1, sculk = 1, not_in_creative_inventory=1, waterlogged = 1,  xp=5},
-	liquids_pointable = true,
+---
+	groups = {handy = 1, hoey = 1, water=3, liquid=3, puts_out_fire=1, building_block=1, sculk = 1, not_in_creative_inventory=1, waterlogged = 1,  xp=5},
 	place_param2 = 1,
 	is_ground_content = false,
-	_mcl_blast_resistance = 3,
-	light_source  = 3,
+	_mcl_blast_resistance = -1,
 	_mcl_hardness = 3,
 	_mcl_silk_touch_drop = true and {"mcl_sculk:sculk_sensor"},
-	on_construct = function(pos)
-		emit_mesecon_signal(pos)
-  		minetest.after(3, function()
-    	if minetest.get_node(pos).name == "mcl_sculk:sculk_sensor_active_w_logged" then
-      		minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_inactive_w_logged"})
-      		stop_mesecon_signal(pos)
+    	on_timer = function(pos)
+        	-- Call the function for player and entity detection
+        		detect_player_and_entities(pos)
+        			return true
+    	end,
+    	on_construct = function(pos)
+	minetest.after(0.1, function()
+    		if minetest.get_node(pos).name == "mcl_sculk:sculk_sensor_w_logged" then
+      	minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_inactive_w_logged"})
     		end
   	end)
-    		end,
+    	end,
 	after_dig_node = function(pos)
 		local node = minetest.get_node(pos)
 		local dim = mcl_worlds.pos_to_dimension(pos)
@@ -910,9 +892,6 @@ minetest.register_node("mcl_sculk:sculk_sensor_active_w_logged", {
 			minetest.sound_play("fire_extinguish_flame", {pos = pos, gain = 0.25, max_hear_distance = 16}, true)
 		end
 	end,
-	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        	handle_bucket_rightclick(pos, node.name, clicker)
-    end,
 })
 
 minetest.register_node("mcl_sculk:sculk_sensor_inactive_w_logged", {
@@ -986,7 +965,7 @@ minetest.register_node("mcl_sculk:sculk_sensor_inactive_w_logged", {
 	groups = {handy = 1, hoey = 1, water=3, liquid=3, puts_out_fire=1, building_block=1, sculk = 1, not_in_creative_inventory=1, waterlogged = 1,  xp=5},
 	place_param2 = 1,
 	is_ground_content = false,
-	_mcl_blast_resistance = 3,
+	_mcl_blast_resistance = -1,
 	_mcl_hardness = 3,
 	_mcl_silk_touch_drop = true and {"mcl_sculk:sculk_sensor"},
     	on_timer = function(pos)
@@ -995,7 +974,7 @@ minetest.register_node("mcl_sculk:sculk_sensor_inactive_w_logged", {
         			return true
     	end,
     	on_construct = function(pos)
-    	 	minetest.after(1, function()
+    	 	minetest.after(0.1, function()
     	 	minetest.get_node_timer(pos):start(0.1)
   		end)
   	end,
@@ -1013,28 +992,115 @@ minetest.register_node("mcl_sculk:sculk_sensor_inactive_w_logged", {
     end,
 })
 
+minetest.register_node("mcl_sculk:sculk_sensor_active_w_logged", {
+	description = "Sculk Sensor Active Water Logged",
+	drawtype = 'mesh',
+	mesh = 'mcl_sculk_sensor.obj',
+	tiles = {
+	{
+	name = "mcl_sculk_sensor_tendril_active.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_tendril_active.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 1.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_top.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_side.png",
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_sculk_sensor_bottom.png",
+	animation = {
+		type = "vertical_frames",
 
-minetest.register_abm({
-    label = "sculk_sensor_active_w_logged to sculk_sensor_inactive_w_logged",
-    nodenames = {"mcl_sculk:sculk_sensor_active_w_logged"},
-    interval = 2.5,
-    chance = 1,
-    action = function(pos)
-        local node = minetest.get_node(pos)
-        if node.name == "mcl_sculk:sculk_sensor_active_w_logged" then
-            local meta = minetest.get_meta(pos)
-            local creation_time = meta:get_int("creation_time") or 0
-            local current_time = minetest.get_gametime()
-
-            -- Check if the node has existed for at least 5 seconds (100 ticks per second)
-            local existence_time = current_time - creation_time
-            local existence_seconds = existence_time / 100
-            if existence_seconds >= 5 then
-                -- Revert to inactive sculk sensor node after turning off mesecon signal
-                stop_mesecon_signal(pos)
-                minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_inactive_w_logged"})
-            end
-        end
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 2.0,
+	}},
+	{
+	name = "mcl_core_water_source_animation_colorised.png", ---water texture here
+	animation = {
+		type = "vertical_frames",
+		aspect_w = 16,
+		aspect_h = 16,
+		length = 3.0,
+	},
+	backface_culling = false,
+	}
+		},
+	use_texture_alpha = "blend",		
+	drop = "",
+	sounds = sounds,
+	collision_box = {
+			type = 'fixed',
+			fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
+		},
+   	selection_box = {
+			type = "fixed",
+   	 		fixed = {-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+   	},
+	groups = {handy = 1, hoey = 1, liquid=3, puts_out_fire=1, building_block=1, sculk = 1, not_in_creative_inventory=1, waterlogged = 1,  xp=5},
+	liquids_pointable = true,
+	place_param2 = 1,
+	is_ground_content = false,
+	_mcl_blast_resistance = -1,
+	light_source  = 3,
+	_mcl_hardness = 3,
+	_mcl_silk_touch_drop = true and {"mcl_sculk:sculk_sensor"},
+    	on_construct = function(pos)
+        	-- Emit mesecon signal when the active sculk sensor node is created
+        	mesecon.receptor_on(pos, mesecon.rules.alldirs)
+        	emit_mesecon_signal(pos)
+        	minetest.sound_play("mcl_sculk_sensor_active", {
+        	pos = pos,
+        	gain = 0.5,
+        	max_hear_distance = 16
+    		})
+  	minetest.after(1.5, function()
+    		if minetest.get_node(pos).name == "mcl_sculk:sculk_sensor_active_w_logged" then
+      		minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_w_logged"})
+      		stop_mesecon_signal(pos)
+    			end
+  		minetest.sound_play("mcl_sculk_sensor_inactive", {
+        	pos = pos,
+        	gain = 0.2,
+        	max_hear_distance = 16
+    		})
+  		end)
+    	end,
+	after_dig_node = function(pos)
+		local node = minetest.get_node(pos)
+		local dim = mcl_worlds.pos_to_dimension(pos)
+		if minetest.get_item_group(node.name, "water") == 0 and dim ~= "nether" then
+			minetest.set_node(pos, {name="mcl_core:water_source"})
+		else
+			minetest.sound_play("fire_extinguish_flame", {pos = pos, gain = 0.25, max_hear_distance = 16}, true)
+		end
+	end,
+	on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+        	handle_bucket_rightclick(pos, node.name, clicker)
     end,
 })
+
 
