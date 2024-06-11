@@ -69,3 +69,12 @@ minetest.register_node("mcl_froglight:verdant", {
 	_mcl_hardness = 0.3,
 	_mcl_silk_touch_drop = true,
 })
+
+--achievement
+awards.register_achievement("mcl:froglights", {
+	title = S("With our powers combined!"),
+	description = S("Have all 3 froglights in your inventory"),
+	icon = "froglight_award.png",
+	type = "Advancement",
+	group = "Husbandry",
+})
