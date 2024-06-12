@@ -19,6 +19,7 @@ local goat_horns = {
 for _, variant in ipairs(goat_horns) do
     minetest.register_craftitem("mcl_goat_horn:" .. variant.name, {
         description = variant.description,
+        stack_max = 1, -- Ensure the item does not stack
         inventory_image = "mcl_goat_horn_goat_horn.png", -- Replace with your shared texture
         on_secondary_use = function(itemstack, user, pointed_thing)
             local player_name = user:get_player_name()
