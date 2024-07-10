@@ -292,28 +292,3 @@ minetest.override_item("mcl_sculk:shrieker_w_logged",{
 		end
 	end,
 })
---------------------------------------------------
---[[--Add this in mcl_deepslate----------------------
-if minetest.get_modpath("mcl_deepslate") then
-
-minetest.register_node("mcl_deepslate:reinforced_deepslate", {
-	description = S("Reinforced Deepslate"),
-	tiles = {
-		"mcl_deepslate_reinforced_deepslate_top.png",
-		"mcl_deepslate_reinforced_deepslate_bottom.png",
-		"mcl_deepslate_reinforced_deepslate_side.png"
-	},
-	drop = "",
-	sounds = mcl_sounds.node_sound_stone_defaults(),
-	groups = {creative_breakable=1, building_block=1, material_stone=1, },
-	sounds = mcl_sounds.node_sound_stone_defaults(),
-	is_ground_content = false,
-	on_blast = function() end,
-	drop = "",
-	_mcl_blast_resistance = 3600000,
-	_mcl_hardness = -1,
-	_mcl_silk_touch_drop = false,
-})
-end
---]]
-
