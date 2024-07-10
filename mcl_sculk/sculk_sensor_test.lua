@@ -16,7 +16,6 @@ local sounds = {
     dug = {name = "mcl_sculk_block", "mcl_sculk_2", },
 }
 
----sculk sensor-----------------
 ------ List of specific wool nodes
 local wool = {
 "mcl_wool:white",
@@ -60,6 +59,7 @@ local wool = {
 -- Ignored entities for detection
 local ignored_entities = {
     "mcl_sculk:vibration",
+	--mobs_mc:warden
 }
 
 -- Function to check if an entity is in the ignored_entities list
@@ -168,7 +168,6 @@ local function handle_bucket_rightclick(pos, node_name, clicker)
     end
 end
 
-
 -- Function to play sound at a specific position
 local function play_sound(pos, sound)
     minetest.sound_play(sound, {
@@ -180,7 +179,7 @@ end
 
 -- Sound mappings for specific nodes
 local node_sounds = {
-    ["mcl_sculk:sculk_sensor_inactive"] = "mcl_sculk_shrieking",
+    ["mcl_sculk:sculk_sensor_inactive"] = "mcl_sculk_sensor_active",
     -- Add more mappings for other nodes here
 }
 
@@ -405,10 +404,6 @@ minetest.register_on_dignode(function(pos, old_node, digger)
         handle_node_change(pos)
     end
 end)
-
-
--- Ensure other parts of the code as given above, e.g., handle_node_change, isWoolNode, and other relevant functions are correctly defined and used.
-
 
 --- Define a list of nodes to be neglected during swapping
 local ignored_nodes = {
@@ -765,7 +760,6 @@ description = "Sculk Sensor Active",
 })
 
 ----------------water_logged
-
 minetest.register_node("mcl_sculk:sculk_sensor_inactive_w_logged", {
 	description = "Sculk Sensor Inactive Water Logged",
 	drawtype = 'mesh',
@@ -858,7 +852,6 @@ minetest.register_node("mcl_sculk:sculk_sensor_inactive_w_logged", {
         	handle_bucket_rightclick(pos, node.name, clicker)
     end,
 })
-
 
 minetest.register_node("mcl_sculk:sculk_sensor_active_w_logged", {
 	description = "Sculk Sensor Active Water Logged",
@@ -1174,5 +1167,3 @@ minetest.override_item("mcl_sculk:sculk_sensor_active_w_logged",{
     	end,
 })
 --]]--
-sculk_sensor_test.lua
-38 KB
