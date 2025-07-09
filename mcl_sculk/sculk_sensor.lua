@@ -1072,21 +1072,11 @@ minetest.register_node("mcl_sculk:sculk_sensor_active_w_logged", {
         	-- Emit mesecon signal when the active sculk sensor node is created
         	mesecon.receptor_on(pos, mesecon.rules.alldirs)
         	emit_mesecon_signal(pos)
-        	minetest.sound_play("mcl_sculk_sensor_active", {
-        	pos = pos,
-        	gain = 0.5,
-        	max_hear_distance = 16
-    		})
   	minetest.after(1.5, function()
     		if minetest.get_node(pos).name == "mcl_sculk:sculk_sensor_active_w_logged" then
       		minetest.set_node(pos, {name = "mcl_sculk:sculk_sensor_w_logged"})
       		stop_mesecon_signal(pos)
     			end
-  		minetest.sound_play("mcl_sculk_sensor_inactive", {
-        	pos = pos,
-        	gain = 0.2,
-        	max_hear_distance = 16
-    		})
   		end)
     	end,
 	after_dig_node = function(pos)

@@ -8,10 +8,13 @@ local S = minetest.get_translator(minetest.get_current_modname())
 
 local mt_sound_play = minetest.sound_play
 
+local sound = "mcl_sculk_shreiker"
+
 local sounds = {
     footstep = {name = "mcl_sculk_block_2", },
     place = {name = "mcl_sculk_block_2", },
     dug = {name = "mcl_sculk_block", "mcl_sculk_2", },
+    sound = {name = "mcl_sculk_shreiker", },
 }
 
 -- List of specific wool nodes
